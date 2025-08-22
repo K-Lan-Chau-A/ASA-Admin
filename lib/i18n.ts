@@ -44,6 +44,7 @@ export interface Translations {
     premium: string
     monthly: string
     yearly: string
+    details: string
   }
   
   // Dashboard
@@ -303,6 +304,7 @@ export const translations: Record<Language, Translations> = {
       premium: 'Nâng cao',
       monthly: 'Hàng tháng',
       yearly: 'Hàng năm',
+      details: 'Chi tiết',
     },
     dashboard: {
       title: 'Dashboard',
@@ -542,6 +544,7 @@ export const translations: Record<Language, Translations> = {
       premium: 'Premium',
       monthly: 'Monthly',
       yearly: 'Yearly',
+      details: 'Details',
     },
     dashboard: {
       title: 'Dashboard',
