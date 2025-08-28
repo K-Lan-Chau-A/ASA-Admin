@@ -82,7 +82,7 @@ export function LoginForm({
                   <a
                     href="#"
                     className="ml-auto text-sm underline-offset-2 hover:underline"
-                    tabIndex={3}
+                    tabIndex={4}
                   >
                     Forgot your password?
                   </a>
@@ -98,7 +98,7 @@ export function LoginForm({
                   tabIndex={2}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading} tabIndex={3}>
                 {isLoading ? "Đang đăng nhập..." : "Login"}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
