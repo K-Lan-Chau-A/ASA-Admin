@@ -5,10 +5,15 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, LogOut, Shield, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/contexts/language-context"
+import { useRouter } from "next/navigation"
 
 export default function LogoutPage() {
   const { t } = useLanguage()
-
+  const router = useRouter()
+  const handleLogout = () => {
+    localStorage.removeItem("token")
+    router.push("/login")
+  }
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
@@ -51,7 +56,7 @@ export default function LogoutPage() {
               <Button variant="outline" className="flex-1">
                 Hủy
               </Button>
-              <Button className="flex-1">
+              <Button className="flex-1" onClick={handleLogout}>
                 Đăng xuất
               </Button>
             </div>

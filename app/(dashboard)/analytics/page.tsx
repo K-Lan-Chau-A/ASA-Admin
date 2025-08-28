@@ -33,7 +33,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">₫1,250,000,000</div>
-                <p className="text-xs text-muted-foreground">+15.2% so với năm trước</p>
+                <p className="text-xs text-muted-foreground">+15.2% {t('analytics.fromLastYear')}</p>
               </CardContent>
             </Card>
 
@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">156</div>
-                <p className="text-xs text-muted-foreground">+8.3% so với tháng trước</p>
+                <p className="text-xs text-muted-foreground">+8.3% {t('analytics.fromLastMonth')}</p>
               </CardContent>
             </Card>
 
@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">94.2%</div>
-                <p className="text-xs text-muted-foreground">+2.1% so với tháng trước</p>
+                <p className="text-xs text-muted-foreground">+2.1% {t('analytics.fromLastMonth')}</p>
               </CardContent>
             </Card>
 
@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">67</div>
-                <p className="text-xs text-muted-foreground">42.9% tổng số shops</p>
+                <p className="text-xs text-muted-foreground">42.9% {t('analytics.totalShopsCount')}</p>
               </CardContent>
             </Card>
           </div>
@@ -74,18 +74,18 @@ export default function AnalyticsPage() {
           <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Tỷ lệ đăng ký mới so với gia hạn</CardTitle>
-                <CardDescription>So sánh số lượng shop đăng ký mới và gia hạn trong 12 tháng</CardDescription>
+                <CardTitle>{t('analytics.newVsRenewal')}</CardTitle>
+                <CardDescription>{t('analytics.newVsRenewalSubtitle')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="text-center p-3 bg-blue-50 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600">89</div>
-                    <div className="text-sm text-blue-600">Đăng ký mới</div>
+                    <div className="text-sm text-blue-600">{t('analytics.newRegistrations')}</div>
                   </div>
                   <div className="text-center p-3 bg-purple-50 rounded-lg">
                     <div className="text-2xl font-bold text-purple-600">67</div>
-                    <div className="text-sm text-purple-600">Gia hạn</div>
+                    <div className="text-sm text-purple-600">{t('analytics.renewals')}</div>
                   </div>
                 </div>
                 <div className="h-56">
@@ -197,15 +197,15 @@ function RevenueChart() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-3 bg-blue-50 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">₫2.5T</div>
-          <div className="text-sm text-blue-600">Tổng doanh thu năm</div>
+          <div className="text-sm text-blue-600">{t('analytics.totalRevenueYear')}</div>
         </div>
         <div className="text-center p-3 bg-green-50 rounded-lg">
           <div className="text-2xl font-bold text-green-600">+15.2%</div>
-          <div className="text-sm text-green-600">Tăng trưởng</div>
+          <div className="text-sm text-green-600">{t('analytics.growth')}</div>
         </div>
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">₫208M</div>
-          <div className="text-sm text-purple-600">Trung bình/tháng</div>
+          <div className="text-sm text-purple-600">{t('analytics.averagePerMonth')}</div>
         </div>
       </div>
       
@@ -216,11 +216,11 @@ function RevenueChart() {
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip 
-              formatter={(value: number) => [`₫${value}M`, 'Doanh thu']}
-              labelFormatter={(label) => `Tháng ${label}`}
+              formatter={(value: number) => [`₫${value}M`, t('analytics.revenueAmount')]}
+              labelFormatter={(label) => `${t('analytics.month')} ${label}`}
             />
-            <Bar dataKey="revenue" fill="#3b82f6" name="Doanh thu thực tế" />
-            <Bar dataKey="target" fill="#10b981" name="Mục tiêu" />
+            <Bar dataKey="revenue" fill="#3b82f6" name={t('analytics.revenueActual')} />
+            <Bar dataKey="target" fill="#10b981" name={t('analytics.target')} />
           </RechartsBarChart>
         </ResponsiveContainer>
       </div>
@@ -230,6 +230,7 @@ function RevenueChart() {
 
 // New vs Renewal Chart
 function NewVsRenewalChart() {
+  const { t } = useLanguage()
   const data = [
     { month: 'T1', new: 8, renewal: 5 },
     { month: 'T2', new: 10, renewal: 6 },
@@ -251,9 +252,9 @@ function NewVsRenewalChart() {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
         <YAxis />
-        <Tooltip formatter={(value: number) => [value, 'Shops']} labelFormatter={(l) => `Tháng ${l}`} />
-        <Bar dataKey="new" name="Đăng ký mới" fill="#3b82f6" />
-        <Bar dataKey="renewal" name="Gia hạn" fill="#8b5cf6" />
+        <Tooltip formatter={(value: number) => [value, 'Shops']} labelFormatter={(l) => `${t('analytics.month')} ${l}`} />
+        <Bar dataKey="new" name={t('analytics.newRegistrations')} fill="#3b82f6" />
+        <Bar dataKey="renewal" name={t('analytics.renewals')} fill="#8b5cf6" />
       </RechartsBarChart>
     </ResponsiveContainer>
   )
@@ -264,8 +265,8 @@ function ShopPackageChart() {
   const { t } = useLanguage()
   
   const data = [
-    { name: 'Gói Cơ bản', value: 89, color: '#3b82f6' },
-    { name: 'Gói Nâng cao', value: 67, color: '#8b5cf6' }
+    { name: t('analytics.basicPackage'), value: 89, color: '#3b82f6' },
+    { name: t('analytics.premiumPackage'), value: 67, color: '#8b5cf6' }
   ]
 
   const total = data.reduce((sum, item) => sum + item.value, 0)
@@ -275,11 +276,11 @@ function ShopPackageChart() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="text-center p-3 bg-blue-50 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">{data[0].value}</div>
-          <div className="text-sm text-blue-600">Gói Cơ bản</div>
+          <div className="text-sm text-blue-600">{t('analytics.basicPackage')}</div>
         </div>
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">{data[1].value}</div>
-          <div className="text-sm text-purple-600">Gói Nâng cao</div>
+          <div className="text-sm text-purple-600">{t('analytics.premiumPackage')}</div>
         </div>
       </div>
       
@@ -300,7 +301,7 @@ function ShopPackageChart() {
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => [value, 'Số lượng shops']} />
+            <Tooltip formatter={(value: number) => [value, t('analytics.shopCount')]} />
           </RechartsPieChart>
         </ResponsiveContainer>
       </div>
@@ -332,11 +333,11 @@ function PackagePerformanceChart() {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="text-center p-3 bg-blue-50 rounded-lg">
           <div className="text-2xl font-bold text-blue-600">89</div>
-          <div className="text-sm text-blue-600">Gói Cơ bản</div>
+          <div className="text-sm text-blue-600">{t('analytics.basicPackage')}</div>
         </div>
         <div className="text-center p-3 bg-purple-50 rounded-lg">
           <div className="text-2xl font-bold text-purple-600">67</div>
-          <div className="text-sm text-purple-600">Gói Nâng cao</div>
+          <div className="text-sm text-purple-600">{t('analytics.premiumPackage')}</div>
         </div>
       </div>
       
@@ -347,11 +348,11 @@ function PackagePerformanceChart() {
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip 
-              formatter={(value: number) => [value, 'Số lượng shops']}
-              labelFormatter={(label) => `Tháng ${label}`}
+              formatter={(value: number) => [value, t('analytics.shopCount')]}
+              labelFormatter={(label) => `${t('analytics.month')} ${label}`}
             />
-            <Line type="monotone" dataKey="basic" stroke="#3b82f6" name="Gói Cơ bản" strokeWidth={2} />
-            <Line type="monotone" dataKey="premium" stroke="#8b5cf6" name="Gói Nâng cao" strokeWidth={2} />
+            <Line type="monotone" dataKey="basic" stroke="#3b82f6" name={t('analytics.basicPackage')} strokeWidth={2} />
+            <Line type="monotone" dataKey="premium" stroke="#8b5cf6" name={t('analytics.premiumPackage')} strokeWidth={2} />
           </RechartsLineChart>
         </ResponsiveContainer>
       </div>

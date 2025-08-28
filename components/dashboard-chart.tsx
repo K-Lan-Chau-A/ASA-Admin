@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { useLanguage } from "@/contexts/language-context"
+import { useTheme } from "next-themes"
 
 const data = [
   {
@@ -56,27 +57,40 @@ const data = [
 
 export function DashboardChart() {
   const { t } = useLanguage()
+  const { theme } = useTheme()
+
+  // Theme-aware colors
+  const textColor = theme === "dark" ? "#e5e7eb" : "#374151"
+  const axisColor = theme === "dark" ? "#6b7280" : "#9ca3af"
 
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={data}>
         <XAxis
           dataKey="month"
-          stroke="#888888"
+          stroke={axisColor}
           fontSize={12}
           tickLine={false}
           axisLine={false}
+          tick={{ fill: textColor }}
         />
         <YAxis
-          stroke="#888888"
+          stroke={axisColor}
           fontSize={12}
           tickLine={false}
           axisLine={false}
+          tick={{ fill: textColor }}
           tickFormatter={(value) => `₫${(value / 1000000).toFixed(0)}M`}
         />
         <Tooltip 
           formatter={(value: number) => [`₫${value.toLocaleString()}`, t('common.amount')]}
           labelFormatter={(label) => `Tháng ${label}`}
+          contentStyle={{
+            backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
+            border: theme === "dark" ? "1px solid #374151" : "1px solid #e5e7eb",
+            borderRadius: "8px",
+            color: textColor
+          }}
         />
         <Bar
           dataKey="revenue"

@@ -65,6 +65,12 @@ export interface Translations {
     fromYesterday: string
     fromLastWeek: string
     fromLastMonth: string
+    newShopsThisWeek: string
+    newShopsThisMonth: string
+    revenueThisWeek: string
+    revenueThisMonth: string
+    premiumPackagesThisWeek: string
+    premiumPackagesThisMonth: string
   }
   
   // Shops
@@ -130,6 +136,7 @@ export interface Translations {
     creditCard: string
     successRate: string
     failureRate: string
+    fromLastMonth: string
   }
   
   // Promotions
@@ -215,6 +222,27 @@ export interface Translations {
     packagePerformance: string
     packagePerformanceSubtitle: string
     chartPlaceholder: string
+    newVsRenewal: string
+    newVsRenewalSubtitle: string
+    fromLastMonth: string
+    fromLastWeek: string
+    fromLastYear: string
+    // New translations for analytics page
+    totalRevenueYear: string
+    growth: string
+    averagePerMonth: string
+    revenueActual: string
+    target: string
+    newRegistrations: string
+    renewals: string
+    basicPackage: string
+    premiumPackage: string
+    shopCount: string
+    totalShopsCount: string
+    basicPackageShops: string
+    premiumPackageShops: string
+    month: string
+    revenueAmount: string
   }
   
   // Settings
@@ -323,6 +351,12 @@ export const translations: Record<Language, Translations> = {
       fromYesterday: 'so với hôm qua',
       fromLastWeek: 'so với tuần trước',
       fromLastMonth: 'so với tháng trước',
+      newShopsThisWeek: 'Shops mới tuần này',
+      newShopsThisMonth: 'Shops mới tháng này',
+      revenueThisWeek: 'Doanh thu tuần này',
+      revenueThisMonth: 'Doanh thu tháng này',
+      premiumPackagesThisWeek: 'Gói Premium tuần này',
+      premiumPackagesThisMonth: 'Gói Premium tháng này',
     },
     shops: {
       title: 'Quản lý Shops',
@@ -382,6 +416,7 @@ export const translations: Record<Language, Translations> = {
       creditCard: 'Thẻ tín dụng',
       successRate: 'Tỷ lệ thành công',
       failureRate: 'Tỷ lệ thất bại',
+      fromLastMonth: 'so với tháng trước',
     },
     promotions: {
       title: 'Quản lý Khuyến mãi',
@@ -461,6 +496,27 @@ export const translations: Record<Language, Translations> = {
       packagePerformance: 'Hiệu suất các gói dịch vụ',
       packagePerformanceSubtitle: 'So sánh hiệu suất giữa gói Basic và Premium',
       chartPlaceholder: 'Biểu đồ sẽ được hiển thị ở đây',
+      newVsRenewal: 'Tỷ lệ đăng ký mới so với gia hạn',
+      newVsRenewalSubtitle: 'So sánh số lượng shop đăng ký mới và gia hạn trong 12 tháng',
+      fromLastMonth: 'so với tháng trước',
+      fromLastWeek: 'so với tuần trước',
+      fromLastYear: 'so với năm trước',
+      // New translations for analytics page
+      totalRevenueYear: 'Tổng doanh thu năm',
+      growth: 'Tăng trưởng',
+      averagePerMonth: 'Trung bình/tháng',
+      revenueActual: 'Doanh thu thực tế',
+      target: 'Mục tiêu',
+      newRegistrations: 'Đăng ký mới',
+      renewals: 'Gia hạn',
+      basicPackage: 'Gói Cơ bản',
+      premiumPackage: 'Gói Nâng cao',
+      shopCount: 'Số lượng shops',
+      totalShopsCount: 'Tổng số shops',
+      basicPackageShops: 'Gói Cơ bản',
+      premiumPackageShops: 'Gói Nâng cao',
+      month: 'Tháng',
+      revenueAmount: 'Doanh thu',
     },
     settings: {
       title: 'Cài đặt',
@@ -550,9 +606,15 @@ export const translations: Record<Language, Translations> = {
       title: 'Dashboard',
       subtitle: 'Overview of your POS platform statistics and performance.',
       newShopsToday: 'New Shops Today',
+      newShopsThisWeek: 'New Shops This Week',
+      newShopsThisMonth: 'New Shops This Month',
       totalActiveShops: 'Total Active Shops',
       revenueToday: 'Revenue Today',
+      revenueThisWeek: 'Revenue This Week',
+      revenueThisMonth: 'Revenue This Month',
       premiumPackages: 'Premium Packages',
+      premiumPackagesThisWeek: 'Premium Packages This Week',
+      premiumPackagesThisMonth: 'Premium Packages This Month',
       revenueOverview: 'Revenue Overview',
       revenueOverviewSubtitle: 'Monthly revenue from shop subscriptions',
       recentShopActivities: 'Recent Shop Activities',
@@ -622,6 +684,7 @@ export const translations: Record<Language, Translations> = {
       creditCard: 'Credit Card',
       successRate: 'Success Rate',
       failureRate: 'Failure Rate',
+      fromLastMonth: 'from last month',
     },
     promotions: {
       title: 'Promotion Management',
@@ -701,6 +764,27 @@ export const translations: Record<Language, Translations> = {
       packagePerformance: 'Package Performance',
       packagePerformanceSubtitle: 'Performance comparison between Basic and Premium packages',
       chartPlaceholder: 'Chart will be displayed here',
+      newVsRenewal: 'New vs Renewal',
+      newVsRenewalSubtitle: 'Comparison of new shop registrations and renewals over the last 12 months',
+      fromLastMonth: 'from last month',
+      fromLastWeek: 'from last week',
+      fromLastYear: 'from last year',
+      // New translations for analytics page
+      totalRevenueYear: 'Total Annual Revenue',
+      growth: 'Growth',
+      averagePerMonth: 'Average per Month',
+      revenueActual: 'Actual Revenue',
+      target: 'Target',
+      newRegistrations: 'New Registrations',
+      renewals: 'Renewals',
+      basicPackage: 'Basic Package',
+      premiumPackage: 'Premium Package',
+      shopCount: 'Shop Count',
+      totalShopsCount: 'Total Shops',
+      basicPackageShops: 'Basic Package',
+      premiumPackageShops: 'Premium Package',
+      month: 'Month',
+      revenueAmount: 'Revenue',
     },
     settings: {
       title: 'Settings',

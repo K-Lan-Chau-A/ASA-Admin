@@ -142,7 +142,7 @@ export default function TransactionsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,250</div>
-            <p className="text-xs text-muted-foreground">+12% so với tháng trước</p>
+            <p className="text-xs text-muted-foreground">+12% {t('transactions.fromLastMonth')}</p>
           </CardContent>
         </Card>
 
@@ -153,7 +153,7 @@ export default function TransactionsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₫45,000,000</div>
-            <p className="text-xs text-muted-foreground">+8.5% so với tháng trước</p>
+            <p className="text-xs text-muted-foreground">+8.5% {t('transactions.fromLastMonth')}</p>
           </CardContent>
         </Card>
 
