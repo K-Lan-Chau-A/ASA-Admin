@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 
@@ -55,7 +56,12 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8" onSubmit={handleSubmit}>
+          <form className="p-6 md:p-8 relative" onSubmit={handleSubmit}>
+            {/* Theme Toggle Button */}
+            <div className="absolute top-4 right-4">
+              <ThemeToggle />
+            </div>
+            
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -87,13 +93,13 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
+                <Input
+                  id="password"
+                  type="password"
                   placeholder="admin"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required 
+                  required
                   disabled={isLoading}
                   tabIndex={2}
                 />
@@ -141,23 +147,22 @@ export function LoginForm({
                   Sign up
                 </a>
               </div>
-              <div className="text-center text-xs text-muted-foreground border-t border-border pt-4">
-                Demo account: admin / admin
-              </div>
             </div>
           </form>
+
           <div className="bg-muted relative hidden md:block">
             <img
               src="/logo.jpg"
               alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-cover"
             />
+
           </div>
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our    <a href="#" className="underline underline-offset-4">Terms of Service</a>{" "}
+        and <a href="#" className="underline underline-offset-4">Privacy Policy</a>.
       </div>
     </div>
   )

@@ -87,22 +87,19 @@ export default function SettingsPage() {
           </Card>
         </Link>
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-3">
-              <Settings className="h-8 w-8 text-gray-500" />
-              <div>
-                <CardTitle className="text-lg">Hệ thống</CardTitle>
-                <CardDescription>Cài đặt hệ thống nâng cao</CardDescription>
+        <Link href="/settings/interface">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <Settings className="h-8 w-8 text-gray-500" />
+                <div>
+                  <CardTitle className="text-lg">Giao diện</CardTitle>
+                  <CardDescription>Cài đặt giao diện</CardDescription>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" size="sm" disabled>
-              Sắp có
-            </Button>
-          </CardContent>
-        </Card>
+            </CardHeader>
+          </Card>
+        </Link>
       </div>
     </div>
   )
