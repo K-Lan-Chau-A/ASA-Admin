@@ -2,7 +2,9 @@
 
 import { useSidebar } from "./sidebar-provider"
 import { useLanguage } from "@/contexts/language-context"
-import { Bell, Search, User, Menu, Check, X } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
+import { Bell, Search, User, Menu, Check, X, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -55,6 +57,8 @@ const sampleNotifications = [
 export function Header() {
   const { toggle } = useSidebar()
   const { t } = useLanguage()
+  const { logout } = useAuth()
+  const router = useRouter()
   const [notifications, setNotifications] = useState(sampleNotifications)
 
   const unreadCount = notifications.filter(n => !n.read).length
@@ -71,6 +75,11 @@ export function Header() {
 
   const handleNotificationClick = (id: number) => {
     markAsRead(id)
+  }
+
+  const handleLogout = () => {
+    logout()
+    router.push("/login")
   }
 
   const getNotificationIcon = (type: string) => {
@@ -202,7 +211,10 @@ export function Header() {
             <DropdownMenuItem>{t('header.profile')}</DropdownMenuItem>
             <DropdownMenuItem>{t('header.settings')}</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>{t('header.logout')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              {t('header.logout')}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

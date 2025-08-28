@@ -4,6 +4,8 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { LanguageProvider } from "@/contexts/language-context"
+import { AuthProvider } from "@/contexts/auth-context"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,9 +23,12 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={inter.className}>
-        <LanguageProvider>
-          <SidebarProvider>{children}</SidebarProvider>
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+          </LanguageProvider>
+        </AuthProvider>
+        <Toaster />
       </body>
     </html>
   )
