@@ -17,6 +17,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { login } = useAuth()
   const router = useRouter()
@@ -69,7 +70,7 @@ export function LoginForm({
                 <Input
                   id="username"
                   type="text"
-                  placeholder="admin"
+                  placeholder="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -88,16 +89,59 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="admin"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  tabIndex={2}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={isLoading}
+                    tabIndex={2}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 px-2"
+                    onClick={() => setShowPassword((v) => !v)}
+                    tabIndex={5}
+                  >
+                    {showPassword ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 3l18 18" />
+                        <path d="M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.5a10.523 10.523 0 01-4.293 5.248" />
+                        <path d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c1.66 0 3.232-.36 4.646-1.006" />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M2.036 12.322a1 1 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.64 0 8.577 3.01 9.964 7.178.07.2.07.444 0 .644C20.577 16.49 16.64 19.5 12 19.5c-4.64 0-8.577-3.01-9.964-7.178z" />
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )}
+                    <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                  </Button>
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading} tabIndex={3}>
                 {isLoading ? "Đang đăng nhập..." : "Login"}

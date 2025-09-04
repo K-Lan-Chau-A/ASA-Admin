@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import API_URL from '@/config/api'
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -22,18 +23,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Kiểm tra thông tin đăng nhập
-    if (password === 'admin' && (username === 'admin' || username === 'm@example.com')) {
+    try {
+      const response = await fetch(`${API_URL}/api/authentication/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      })
+
+      if (!response.ok) {
+        return false
+      }
+
+      const body = await response.json().catch(() => ({} as any))
+      const token: string | undefined = body?.data?.accessToken
+      const userData = body?.data
+
+      if (!body?.success || !token || !userData) {
+        return false
+      }
+
       setIsAuthenticated(true)
       localStorage.setItem('isAuthenticated', 'true')
+      localStorage.setItem('authToken', token)
+      localStorage.setItem('authUser', JSON.stringify(userData))
       return true
+    } catch {
+      return false
     }
-    return false
   }
 
   const logout = () => {
     setIsAuthenticated(false)
     localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('authUser')
   }
 
   return (
