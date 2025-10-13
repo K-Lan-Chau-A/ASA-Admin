@@ -6,104 +6,64 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Plus, Store, Calendar, User, Package } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import API_URL from "@/config/api"
+import { useEffect, useMemo, useState } from "react"
 
-interface Shop {
-  id: string
-  name: string
-  owner: string
-  email: string
-  phone: string
-  address: string
-  package: "basic" | "premium"
-  status: "active" | "expired" | "pending"
-  registeredDate: string
-  expiryDate: string
-  revenue: number
+type ApiShop = {
+  shopId: number
+  shopName: string
+  fullname: string
+  phonenumber: string
+  email?: string | null
+  address?: string | null
+  status: number // 1 active, 0 inactive (others pending)
+  productType?: string | null
+  expiredAt?: string | null
+  createdAt?: string
 }
-
-const mockShops: Shop[] = [
-  {
-    id: "1",
-    name: "Coffee House",
-    owner: "Nguyễn Văn A",
-    email: "nguyenvana@coffeehouse.com",
-    phone: "0901234567",
-    address: "123 Nguyễn Huệ, Q1, TP.HCM",
-    package: "premium",
-    status: "active",
-    registeredDate: "2024-01-01",
-    expiryDate: "2024-02-01",
-    revenue: 15000000
-  },
-  {
-    id: "2",
-    name: "Bakery Sweet",
-    owner: "Trần Thị B",
-    email: "tranthib@bakerysweet.com",
-    phone: "0901234568",
-    address: "456 Lê Lợi, Q3, TP.HCM",
-    package: "basic",
-    status: "active",
-    registeredDate: "2024-01-05",
-    expiryDate: "2024-02-05",
-    revenue: 8000000
-  },
-  {
-    id: "3",
-    name: "Tech Store",
-    owner: "Lê Văn C",
-    email: "levanc@techstore.com",
-    phone: "0901234569",
-    address: "789 Trần Hưng Đạo, Q5, TP.HCM",
-    package: "premium",
-    status: "expired",
-    registeredDate: "2023-12-01",
-    expiryDate: "2024-01-01",
-    revenue: 25000000
-  },
-  {
-    id: "4",
-    name: "Fashion Boutique",
-    owner: "Phạm Thị D",
-    email: "phamthid@fashionboutique.com",
-    phone: "0901234570",
-    address: "321 Võ Văn Tần, Q3, TP.HCM",
-    package: "basic",
-    status: "active",
-    registeredDate: "2024-01-10",
-    expiryDate: "2024-02-10",
-    revenue: 12000000
-  },
-  {
-    id: "5",
-    name: "Restaurant Deluxe",
-    owner: "Hoàng Văn E",
-    email: "hoangvane@restaurantdeluxe.com",
-    phone: "0901234571",
-    address: "654 Nguyễn Thị Minh Khai, Q1, TP.HCM",
-    package: "premium",
-    status: "active",
-    registeredDate: "2024-01-08",
-    expiryDate: "2024-02-08",
-    revenue: 30000000
-  },
-  {
-    id: "6",
-    name: "Pharmacy Plus",
-    owner: "Võ Thị F",
-    email: "vothif@pharmacyplus.com",
-    phone: "0901234572",
-    address: "987 Cách Mạng Tháng 8, Q10, TP.HCM",
-    package: "basic",
-    status: "pending",
-    registeredDate: "2024-01-15",
-    expiryDate: "2024-02-15",
-    revenue: 5000000
-  }
-]
 
 export default function ShopsPage() {
   const { t } = useLanguage()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [items, setItems] = useState<ApiShop[]>([])
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`${API_URL}/api/shops?page=1&pageSize=10`)
+        const json = await res.json().catch(() => ({}))
+        const arr: any[] = Array.isArray(json?.items) ? json.items : []
+        setItems(arr as any)
+      } catch (e: any) {
+        setError(e?.message ?? 'Failed to load shops')
+        setItems([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    run()
+  }, [])
+
+  const shops = useMemo(() => {
+    return items.map((s) => {
+      const statusText = s.status === 1 ? 'active' : (s.status === 0 ? 'inactive' : 'pending')
+      return {
+        id: String(s.shopId),
+        name: s.shopName,
+        owner: s.fullname,
+        email: s.email || '',
+        phone: s.phonenumber,
+        address: s.address || '',
+        packageText: s.productType || '',
+        status: statusText as 'active' | 'expired' | 'pending' | 'inactive',
+        expiryDate: s.expiredAt ? new Date(s.expiredAt).toISOString().slice(0,10) : '-',
+        registeredDate: s.createdAt ? new Date(s.createdAt).toISOString().slice(0,10) : '-',
+      }
+    })
+  }, [items])
 
   return (
     <div className="flex flex-col gap-4">
@@ -126,16 +86,22 @@ export default function ShopsPage() {
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {mockShops.map((shop) => (
+        {error && (
+          <div className="text-sm text-red-600">{error}</div>
+        )}
+        {loading ? (
+          <div className="text-sm text-muted-foreground">{t('common.loading')}...</div>
+        ) : (
+        shops.map((shop) => (
           <Card key={shop.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{shop.name}</CardTitle>
                 <Badge 
-                  variant={shop.status === 'active' ? 'default' : shop.status === 'expired' ? 'destructive' : 'secondary'}
+                  variant={shop.status === 'active' ? 'default' : shop.status === 'inactive' ? 'secondary' : 'destructive'}
                 >
                   {shop.status === 'active' ? t('shops.status.active') : 
-                   shop.status === 'expired' ? t('shops.status.expired') : 
+                   shop.status === 'inactive' ? t('shops.status.inactive') : 
                    t('shops.status.pending')}
                 </Badge>
               </div>
@@ -152,22 +118,12 @@ export default function ShopsPage() {
               
               <div className="flex items-center gap-2 text-sm">
                 <Package className="h-4 w-4 text-muted-foreground" />
-                <span>{t('shops.package')}: {shop.package === 'basic' ? t('shops.basicPackage') : t('shops.premiumPackage')}</span>
-                <Badge variant="outline" className="ml-auto">
-                  {shop.package === 'basic' ? '₫150,000' : '₫300,000'}
-                </Badge>
+                <span>{t('shops.package')}: {shop.packageText || t('common.none')}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span>{t('shops.expiryDate')}: {shop.expiryDate}</span>
-              </div>
-
-              <div className="pt-2 border-t">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('shops.monthlyRevenue')}:</span>
-                  <span className="font-medium">₫{shop.revenue.toLocaleString()}</span>
-                </div>
               </div>
 
               <div className="flex gap-2 pt-2">
@@ -180,7 +136,8 @@ export default function ShopsPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ))
+        )}
       </div>
     </div>
   )

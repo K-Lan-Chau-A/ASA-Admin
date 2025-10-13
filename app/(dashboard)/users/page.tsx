@@ -9,85 +9,60 @@ import { Search, UserCog, Shield, UserCheck, UserX } from "lucide-react"
 import Link from "next/link"
 import { CreateUserDialog } from "@/components/create-user-dialog"
 import { useLanguage } from "@/contexts/language-context"
+import API_URL from "@/config/api"
+import { useEffect, useMemo, useState } from "react"
 
-interface User {
-  id: string
-  name: string
+type ApiUser = {
+  userId: number
+  username: string
+  fullName: string
   email: string
-  role: "super-admin" | "admin" | "support"
-  phone: string
-  status: "working" | "suspended"
+  phoneNumber: string
+  status: number // 1 working, others suspended
+  role: number // 1 super-admin, 2 admin, 3 support, 4 customer
+  avatar?: string
 }
-
-const users: User[] = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@posadmin.com",
-    role: "super-admin",
-    phone: "0901234567",
-    status: "working",
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    email: "tranthib@posadmin.com",
-    role: "admin",
-    phone: "0901234568",
-    status: "working",
-  },
-  {
-    id: "3",
-    name: "Lê Văn C",
-    email: "levanc@posadmin.com",
-    role: "admin",
-    phone: "0901234569",
-    status: "working",
-  },
-  {
-    id: "4",
-    name: "Phạm Thị D",
-    email: "phamthid@posadmin.com",
-    role: "support",
-    phone: "0901234570",
-    status: "working",
-  },
-  {
-    id: "5",
-    name: "Hoàng Văn E",
-    email: "hoangvane@posadmin.com",
-    role: "support",
-    phone: "0901234571",
-    status: "suspended",
-  },
-  {
-    id: "6",
-    name: "Võ Thị F",
-    email: "vothif@posadmin.com",
-    role: "support",
-    phone: "0901234572",
-    status: "working",
-  },
-  {
-    id: "7",
-    name: "Đặng Văn G",
-    email: "dangvang@posadmin.com",
-    role: "admin",
-    phone: "0901234573",
-    status: "working",
-  },
-  {
-    id: "8",
-    name: "Bùi Thị H",
-    email: "buithih@posadmin.com",
-    role: "support",
-    phone: "0901234574",
-    status: "working",
-  },
-]
 
 export default function UsersPage() {
   const { t } = useLanguage()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [items, setItems] = useState<ApiUser[]>([])
+
+  useEffect(() => {
+    const run = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`${API_URL}/api/users?page=1&pageSize=10`)
+        const json = await res.json().catch(() => ({}))
+        const arr: any[] = Array.isArray(json?.items) ? json.items : []
+        setItems(arr as any)
+      } catch (e: any) {
+        setError(e?.message ?? 'Failed to load users')
+        setItems([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    run()
+  }, [])
+
+  const users = useMemo(() => {
+    const mapRole = (code: number): "super-admin" | "admin" | "support" => {
+      if (code === 1) return "super-admin"
+      if (code === 2) return "admin"
+      return "support"
+    }
+    return items.map((u) => ({
+      id: String(u.userId),
+      name: u.fullName || u.username,
+      email: u.email,
+      role: mapRole(Number(u.role || 0)),
+      phone: u.phoneNumber,
+      status: Number(u.status) === 1 ? "working" as const : "suspended" as const,
+    }))
+  }, [items])
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -155,6 +130,12 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent className="p-0 overflow-auto">
           <div className="w-full min-w-[800px]">
+            {error && (
+              <div className="px-4 py-2 text-sm text-red-600">{error}</div>
+            )}
+            {loading && (
+              <div className="px-4 py-2 text-sm text-muted-foreground">{t('common.loading')}...</div>
+            )}
             <Table>
               <TableHeader>
                 <TableRow>

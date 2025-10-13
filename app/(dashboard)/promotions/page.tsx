@@ -6,95 +6,51 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Plus, Gift, Calendar, Users, Percent } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import API_URL from "@/config/api"
+import { useEffect, useMemo, useState } from "react"
 
-interface Promotion {
-  id: string
-  name: string
-  description: string
-  discountType: "percentage" | "fixed"
-  discountValue: number
+type ApiPromotion = {
+  promotionId: number
+  promotionName: string
+  description?: string
   startDate: string
   endDate: string
-  status: "active" | "inactive" | "expired"
-  targetPackage: "all" | "basic" | "premium"
-  maxUses: number
-  currentUses: number
-  minSubscriptionMonths: number
+  value: number
+  type: string // "%" | "VNĐ"
+  status: number // 1 active; others inactive/expired per backend
 }
-
-const mockPromotions: Promotion[] = [
-  {
-    id: "1",
-    name: "Khuyến mãi mùa hè",
-    description: "Giảm giá cho các shop đăng ký mới trong tháng 6-8",
-    discountType: "percentage",
-    discountValue: 20,
-    startDate: "2024-06-01",
-    endDate: "2024-08-31",
-    status: "active",
-    targetPackage: "all",
-    maxUses: 100,
-    currentUses: 45,
-    minSubscriptionMonths: 3
-  },
-  {
-    id: "2",
-    name: "Ưu đãi gói Premium",
-    description: "Giảm giá đặc biệt cho gói Premium",
-    discountType: "fixed",
-    discountValue: 50000,
-    startDate: "2024-01-01",
-    endDate: "2024-12-31",
-    status: "active",
-    targetPackage: "premium",
-    maxUses: 50,
-    currentUses: 23,
-    minSubscriptionMonths: 6
-  },
-  {
-    id: "3",
-    name: "Khuyến mãi đầu năm",
-    description: "Chào mừng năm mới với ưu đãi hấp dẫn",
-    discountType: "percentage",
-    discountValue: 15,
-    startDate: "2024-01-01",
-    endDate: "2024-02-29",
-    status: "expired",
-    targetPackage: "all",
-    maxUses: 200,
-    currentUses: 156,
-    minSubscriptionMonths: 1
-  },
-  {
-    id: "4",
-    name: "Ưu đãi gói Basic",
-    description: "Giảm giá cho gói cơ bản",
-    discountType: "fixed",
-    discountValue: 25000,
-    startDate: "2024-03-01",
-    endDate: "2024-05-31",
-    status: "inactive",
-    targetPackage: "basic",
-    maxUses: 150,
-    currentUses: 0,
-    minSubscriptionMonths: 2
-  }
-]
 
 export default function PromotionsPage() {
   const { t } = useLanguage()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [items, setItems] = useState<ApiPromotion[]>([])
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "active":
-        return t('promotions.currentlyActive')
-      case "expired":
-        return t('promotions.expired')
-      case "inactive":
-        return t('promotions.suspended')
-      default:
-        return status
+  useEffect(() => {
+    const run = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await fetch(`${API_URL}/api/promotions?page=1&pageSize=10`)
+        const json = await res.json().catch(() => ({}))
+        const arr: any[] = Array.isArray(json?.items) ? json.items : []
+        setItems(arr as any)
+      } catch (e: any) {
+        setError(e?.message ?? 'Failed to load promotions')
+        setItems([])
+      } finally {
+        setLoading(false)
+      }
     }
+    run()
+  }, [])
+
+  const getStatusText = (status: string | number) => {
+    const s = String(status)
+    if (s === '1' || s.toLowerCase() === 'active') return t('promotions.currentlyActive')
+    if (s === '2' || s.toLowerCase() === 'inactive') return t('promotions.suspended')
+    if (s.toLowerCase() === 'expired') return t('promotions.expired')
+    return s
   }
 
   const getTargetPackageText = (target: string) => {
@@ -110,16 +66,18 @@ export default function PromotionsPage() {
     }
   }
 
-  const getDiscountTypeText = (type: string) => {
-    switch (type) {
-      case "percentage":
-        return t('promotions.percentage')
-      case "fixed":
-        return t('promotions.fixed')
-      default:
-        return type
-    }
-  }
+  const normalized = useMemo(() => {
+    return items.map((p) => ({
+      id: String(p.promotionId),
+      name: p.promotionName,
+      description: p.description || '',
+      startDate: p.startDate,
+      endDate: p.endDate,
+      value: Number(p.value || 0),
+      type: p.type, // "%" or "VNĐ"
+      status: p.status,
+    }))
+  }, [items])
 
   return (
     <div className="flex flex-col gap-4">
@@ -142,16 +100,22 @@ export default function PromotionsPage() {
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-        {mockPromotions.map((promotion) => (
+        {error && (
+          <div className="text-sm text-red-600">{error}</div>
+        )}
+        {loading ? (
+          <div className="text-sm text-muted-foreground">{t('common.loading')}...</div>
+        ) : (
+          normalized.map((promotion) => (
           <Card key={promotion.id} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{promotion.name}</CardTitle>
                 <Badge 
                   variant={
-                    promotion.status === 'active' ? 'default' : 
-                    promotion.status === 'expired' ? 'destructive' : 
-                    'secondary'
+                    String(promotion.status) === '1' ? 'default' :
+                    String(promotion.status) === '2' ? 'secondary' :
+                    'destructive'
                   }
                 >
                   {getStatusText(promotion.status)}
@@ -166,12 +130,9 @@ export default function PromotionsPage() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t('promotions.discountType')}:</span>
                 <div className="flex items-center gap-2">
-                  <Percent className="h-4 w-4" />
+               
                   <span className="font-medium">
-                    {promotion.discountType === 'percentage' 
-                      ? `${promotion.discountValue}%` 
-                      : `₫${promotion.discountValue.toLocaleString()}`
-                    }
+                    {String(promotion.type) === '%' ? `${promotion.value}%` : `₫${Number(promotion.value).toLocaleString()}`}
                   </span>
                 </div>
               </div>
@@ -181,21 +142,9 @@ export default function PromotionsPage() {
                 <span>{t('promotions.from')} {promotion.startDate} {t('promotions.to')} {promotion.endDate}</span>
               </div>
 
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span>{t('promotions.appliesTo')}: {getTargetPackageText(promotion.targetPackage)}</span>
-              </div>
+              {/* Target package is not provided by API; omitted */}
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">{t('promotions.usage')}:</span>
-                  <div className="font-medium">{promotion.currentUses}/{promotion.maxUses}</div>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">{t('promotions.minSubscriptionMonths')}:</span>
-                  <div className="font-medium">{promotion.minSubscriptionMonths} {t('promotions.months')}</div>
-                </div>
-              </div>
+              {/* Usage/min months not provided by API; omitted */}
 
               <div className="pt-2 border-t">
                 <div className="flex gap-2">
@@ -203,13 +152,14 @@ export default function PromotionsPage() {
                     {t('common.edit')}
                   </Button>
                   <Button variant="outline" size="sm" className="flex-1">
-                    {promotion.status === 'active' ? t('promotions.suspend') : t('promotions.activate')}
+                    {String(promotion.status) === '1' ? t('promotions.suspend') : t('promotions.activate')}
                   </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )

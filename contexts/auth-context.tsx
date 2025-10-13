@@ -7,19 +7,29 @@ interface AuthContextType {
   isAuthenticated: boolean
   login: (username: string, password: string) => Promise<boolean>
   logout: () => void
+  initialized: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
-    // Kiểm tra trạng thái đăng nhập từ localStorage khi component mount
-    const authStatus = localStorage.getItem('isAuthenticated')
-    if (authStatus === 'true') {
-      setIsAuthenticated(true)
-    }
+    // Hydrate auth state from localStorage on first load
+    try {
+      const token = localStorage.getItem('authToken')
+      const user = localStorage.getItem('authUser')
+      if (token && user) {
+        setIsAuthenticated(true)
+      } else {
+        // Backward compatibility with older flag
+        const authStatus = localStorage.getItem('isAuthenticated')
+        if (authStatus === 'true') setIsAuthenticated(true)
+      }
+    } catch {}
+    setInitialized(true)
   }, [])
 
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -62,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, initialized }}>
       {children}
     </AuthContext.Provider>
   )

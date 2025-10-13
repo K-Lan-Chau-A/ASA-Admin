@@ -45,6 +45,7 @@ export interface Translations {
     monthly: string
     yearly: string
     details: string
+    noMore: string
   }
   
   // Dashboard
@@ -333,6 +334,7 @@ export const translations: Record<Language, Translations> = {
       monthly: 'Hàng tháng',
       yearly: 'Hàng năm',
       details: 'Chi tiết',
+      noMore: 'Hết dữ liệu',
     },
     dashboard: {
       title: 'Dashboard',
@@ -423,7 +425,7 @@ export const translations: Record<Language, Translations> = {
       subtitle: 'Tạo và quản lý các chương trình khuyến mãi cho shop',
       createPromotion: 'Tạo Khuyến mãi',
       searchPromotion: 'Tìm kiếm khuyến mãi...',
-      discountType: 'Loại giảm giá',
+      discountType: 'Giảm giá',
       discountValue: 'Giá trị giảm',
       startDate: 'Ngày bắt đầu',
       endDate: 'Ngày kết thúc',
@@ -691,7 +693,7 @@ export const translations: Record<Language, Translations> = {
       subtitle: 'Create and manage promotional programs for shops',
       createPromotion: 'Create Promotion',
       searchPromotion: 'Search promotions...',
-      discountType: 'Discount Type',
+      discountType: 'Discount',
       discountValue: 'Discount Value',
       startDate: 'Start Date',
       endDate: 'End Date',
@@ -785,6 +787,7 @@ export const translations: Record<Language, Translations> = {
       premiumPackageShops: 'Premium Package',
       month: 'Month',
       revenueAmount: 'Revenue',
+      noMore: 'No more data',
     },
     settings: {
       title: 'Settings',
