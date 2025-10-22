@@ -8,6 +8,8 @@ import { Search, Plus, Store, Calendar, User, Package } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import API_URL from "@/config/api"
 import { useEffect, useMemo, useState } from "react"
+import { CreateShopDialog } from "@/components/create-shop-dialog"
+import { CreateOrderDialog } from "@/components/create-order-dialog"
 
 type ApiShop = {
   shopId: number
@@ -28,23 +30,24 @@ export default function ShopsPage() {
   const [error, setError] = useState<string | null>(null)
   const [items, setItems] = useState<ApiShop[]>([])
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const res = await fetch(`${API_URL}/api/shops?page=1&pageSize=10`)
-        const json = await res.json().catch(() => ({}))
-        const arr: any[] = Array.isArray(json?.items) ? json.items : []
-        setItems(arr as any)
-      } catch (e: any) {
-        setError(e?.message ?? 'Failed to load shops')
-        setItems([])
-      } finally {
-        setLoading(false)
-      }
+  const loadShops = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await fetch(`${API_URL}/api/shops?page=1&pageSize=10`)
+      const json = await res.json().catch(() => ({}))
+      const arr: any[] = Array.isArray(json?.items) ? json.items : []
+      setItems(arr as any)
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to load shops')
+      setItems([])
+    } finally {
+      setLoading(false)
     }
-    run()
+  }
+
+  useEffect(() => {
+    loadShops()
   }, [])
 
   const shops = useMemo(() => {
@@ -79,10 +82,10 @@ export default function ShopsPage() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('shops.title')}</h1>
           <p className="text-muted-foreground">{t('shops.subtitle')}</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          {t('shops.addShop')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <CreateOrderDialog onOrderCreated={loadShops} />
+          <CreateShopDialog onShopCreated={loadShops} trialMode />
+        </div>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -100,7 +103,11 @@ export default function ShopsPage() {
           <div className="text-sm text-muted-foreground">{t('common.loading')}...</div>
         ) : (
         shops.map((shop) => (
-          <Card key={shop.id} className="hover:shadow-md transition-shadow">
+          <Card 
+            key={shop.id} 
+            className="hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => window.location.href = `/shops/${shop.id}`}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{shop.name}</CardTitle>
@@ -145,13 +152,8 @@ export default function ShopsPage() {
                 <span>{t('shops.expiryDate')}: {shop.expiryDate}</span>
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  {t('shops.details')}
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  {t('shops.edit')}
-                </Button>
+              <div className="pt-2 text-center">
+                <p className="text-xs text-muted-foreground">Click để xem chi tiết</p>
               </div>
             </CardContent>
           </Card>
