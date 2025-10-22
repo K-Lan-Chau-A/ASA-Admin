@@ -16,7 +16,7 @@ type ApiShop = {
   phonenumber: string
   email?: string | null
   address?: string | null
-  status: number // 1 active, 0 inactive (others pending)
+  status: number // 0 inactive, 1 active, 2 trial
   productType?: string | null
   expiredAt?: string | null
   createdAt?: string
@@ -49,7 +49,14 @@ export default function ShopsPage() {
 
   const shops = useMemo(() => {
     return items.map((s) => {
-      const statusText = s.status === 1 ? 'active' : (s.status === 0 ? 'inactive' : 'pending')
+      const statusText =
+        s.status === 1
+          ? 'active'
+          : s.status === 0
+          ? 'inactive'
+          : s.status === 2
+          ? 'trial'
+          : 'pending'
       return {
         id: String(s.shopId),
         name: s.shopName,
@@ -58,7 +65,7 @@ export default function ShopsPage() {
         phone: s.phonenumber,
         address: s.address || '',
         packageText: s.productType || '',
-        status: statusText as 'active' | 'expired' | 'pending' | 'inactive',
+        status: statusText as 'active' | 'expired' | 'pending' | 'inactive' | 'trial',
         expiryDate: s.expiredAt ? new Date(s.expiredAt).toISOString().slice(0,10) : '-',
         registeredDate: s.createdAt ? new Date(s.createdAt).toISOString().slice(0,10) : '-',
       }
@@ -98,11 +105,23 @@ export default function ShopsPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">{shop.name}</CardTitle>
                 <Badge 
-                  variant={shop.status === 'active' ? 'default' : shop.status === 'inactive' ? 'secondary' : 'destructive'}
+                  variant={
+                    shop.status === 'active'
+                      ? 'default'
+                      : shop.status === 'inactive'
+                      ? 'secondary'
+                      : shop.status === 'trial'
+                      ? 'secondary'
+                      : 'destructive'
+                  }
                 >
-                  {shop.status === 'active' ? t('shops.status.active') : 
-                   shop.status === 'inactive' ? t('shops.status.inactive') : 
-                   t('shops.status.pending')}
+                  {shop.status === 'active'
+                    ? t('shops.status.active')
+                    : shop.status === 'inactive'
+                    ? t('shops.status.inactive')
+                    : shop.status === 'trial'
+                    ? (t('shops.status.trial') ?? 'Dùng thử')
+                    : t('shops.status.pending')}
                 </Badge>
               </div>
               <CardDescription className="flex items-center gap-2">

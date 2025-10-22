@@ -46,6 +46,7 @@ export interface Translations {
     yearly: string
     details: string
     noMore: string
+    none: string
   }
   
   // Dashboard
@@ -92,6 +93,7 @@ export interface Translations {
       active: string
       expired: string
       pending: string
+      trial: string
     }
   }
   
@@ -107,8 +109,8 @@ export interface Translations {
     status: string
     export: string
     filter: string
-    superAdmin: string
     admin: string
+    staff: string
     support: string
     working: string
     suspended: string
@@ -244,6 +246,7 @@ export interface Translations {
     premiumPackageShops: string
     month: string
     revenueAmount: string
+    noMore: string
   }
   
   // Settings
@@ -335,6 +338,7 @@ export const translations: Record<Language, Translations> = {
       yearly: 'Hàng năm',
       details: 'Chi tiết',
       noMore: 'Hết dữ liệu',
+      none: 'Không có',
     },
     dashboard: {
       title: 'Dashboard',
@@ -377,6 +381,7 @@ export const translations: Record<Language, Translations> = {
         active: 'Hoạt động',
         expired: 'Hết hạn',
         pending: 'Chờ xử lý',
+        trial: 'Dùng thử',
       },
     },
     users: {
@@ -390,8 +395,8 @@ export const translations: Record<Language, Translations> = {
       status: 'Trạng thái',
       export: 'Xuất dữ liệu',
       filter: 'Lọc',
-      superAdmin: 'Super Admin',
       admin: 'Admin',
+      staff: 'Nhân viên',
       support: 'Support',
       working: 'Hoạt động',
       suspended: 'Tạm dừng',
@@ -519,6 +524,7 @@ export const translations: Record<Language, Translations> = {
       premiumPackageShops: 'Gói Nâng cao',
       month: 'Tháng',
       revenueAmount: 'Doanh thu',
+      noMore: 'Hết dữ liệu',
     },
     settings: {
       title: 'Cài đặt',
@@ -603,6 +609,8 @@ export const translations: Record<Language, Translations> = {
       monthly: 'Monthly',
       yearly: 'Yearly',
       details: 'Details',
+      noMore: 'No more data',
+      none: 'None',
     },
     dashboard: {
       title: 'Dashboard',
@@ -645,6 +653,7 @@ export const translations: Record<Language, Translations> = {
         active: 'Active',
         expired: 'Expired',
         pending: 'Pending',
+        trial: 'Trial',
       },
     },
     users: {
@@ -658,8 +667,8 @@ export const translations: Record<Language, Translations> = {
       status: 'Status',
       export: 'Export',
       filter: 'Filter',
-      superAdmin: 'Super Admin',
       admin: 'Admin',
+      staff: 'Staff',
       support: 'Support',
       working: 'Active',
       suspended: 'Suspended',

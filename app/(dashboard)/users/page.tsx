@@ -49,9 +49,9 @@ export default function UsersPage() {
   }, [])
 
   const users = useMemo(() => {
-    const mapRole = (code: number): "super-admin" | "admin" | "support" => {
-      if (code === 1) return "super-admin"
-      if (code === 2) return "admin"
+    const mapRole = (code: number): "admin" | "staff" | "support" => {
+      if (code === 1) return "admin"
+      if (code === 2) return "staff"
       return "support"
     }
     return items.map((u) => ({
@@ -66,10 +66,10 @@ export default function UsersPage() {
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case "super-admin":
-        return <Shield className="h-4 w-4 text-red-500" />
       case "admin":
-        return <UserCheck className="h-4 w-4 text-blue-500" />
+        return <Shield className="h-4 w-4 text-blue-500" />
+      case "staff":
+        return <UserCheck className="h-4 w-4 text-green-500" />
       case "support":
         return <UserX className="h-4 w-4 text-green-500" />
       default:
@@ -79,10 +79,10 @@ export default function UsersPage() {
 
   const getRoleText = (role: string) => {
     switch (role) {
-      case "super-admin":
-        return t('users.superAdmin')
       case "admin":
         return t('users.admin')
+      case "staff":
+        return t('users.staff')
       case "support":
         return t('users.support')
       default:
