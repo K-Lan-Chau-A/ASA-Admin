@@ -24,6 +24,8 @@ import { useState, useEffect, useMemo } from "react"
 import API_URL from "@/config/api"
 import provinces from "@/constant/donViHanhChinh34TinhThanh.json"
 import vietQrBanks from "@/constant/vietQrBank.json"
+import { useLanguage } from "@/contexts/language-context"
+import { ordersTranslations } from "@/lib/orders-i18n"
 
 type Product = {
   productId: number
@@ -96,6 +98,8 @@ type CreateOrderDialogProps = {
 }
 
 export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
+  const { language } = useLanguage()
+  const ot = ordersTranslations[language]
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
@@ -322,23 +326,23 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
     // Validation
     if (formData.shopId === 0) {
-      showNotification('error', 'Vui lòng chọn cửa hàng')
+      showNotification('error', ot.fillAllFields)
       return
     }
     if (formData.productId === 0) {
-      showNotification('error', 'Vui lòng chọn gói sản phẩm')
+      showNotification('error', ot.fillAllFields)
       return
     }
     if (!formData.fullname || !formData.phonenumber || !formData.email) {
-      showNotification('error', 'Vui lòng điền đầy đủ thông tin người mua')
+      showNotification('error', ot.fillAllFields)
       return
     }
     if (!formData.houseNumber || !formData.provinceCode || !formData.wardCode) {
-      showNotification('error', 'Vui lòng điền đầy đủ địa chỉ')
+      showNotification('error', ot.fillAllFields)
       return
     }
     if (formData.paymentMethod === 2 && (!formData.bankName || !formData.bankNum)) {
-      showNotification('error', 'Vui lòng điền thông tin ngân hàng cho phương thức chuyển khoản')
+      showNotification('error', ot.fillAllFields)
       return
     }
 
@@ -453,10 +457,10 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
         onOrderCreated()
       }
 
-      showNotification('success', 'Tạo đơn hàng thành công!')
+      showNotification('success', ot.createSuccess)
     } catch (err) {
       console.error('Create order failed:', err)
-      showNotification('error', 'Tạo đơn hàng thất bại. Vui lòng thử lại sau.')
+      showNotification('error', ot.createError)
     } finally {
       setIsSubmitting(false)
     }
@@ -468,17 +472,17 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
         <DialogTrigger asChild>
           <Button variant="outline">
             <Plus className="mr-2 h-4 w-4" />
-            Tạo đơn hàng
+            {ot.createOrder}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
-              Tạo đơn hàng mới
+              {ot.createOrder}
             </DialogTitle>
             <DialogDescription>
-              Điền thông tin để tạo một đơn hàng mới.
+              {ot.createOrderDescription}
             </DialogDescription>
           </DialogHeader>
           
@@ -486,7 +490,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
             <div className="grid gap-4 py-4">
               {/* Shop Selection */}
               <div className="space-y-2">
-                <Label>Cửa hàng *</Label>
+                <Label>{ot.shop} {ot.required}</Label>
                 <Select
                   value={formData.shopId === 0 ? "" : formData.shopId.toString()}
                   onValueChange={(value) => handleInputChange('shopId', parseInt(value))}
@@ -494,7 +498,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={loadingShops ? "Đang tải cửa hàng..." : "Chọn cửa hàng *"} />
+                    <SelectValue placeholder={loadingShops ? ot.loadingShops : ot.selectShop} />
                   </SelectTrigger>
                   <SelectContent>
                     {shops.map(shop => (
@@ -508,7 +512,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
               {/* Product Selection */}
               <div className="space-y-2">
-                <Label>Gói sản phẩm *</Label>
+                <Label>{ot.productPackage} {ot.required}</Label>
                 <Select
                   value={formData.productId === 0 ? "" : formData.productId.toString()}
                   onValueChange={(value) => handleInputChange('productId', parseInt(value))}
@@ -516,7 +520,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={loadingProducts ? "Đang tải sản phẩm..." : "Chọn gói sản phẩm *"} />
+                    <SelectValue placeholder={loadingProducts ? ot.loadingProducts : ot.selectPackage} />
                   </SelectTrigger>
                   <SelectContent>
                     {products.map(product => (
@@ -530,7 +534,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
               {/* Total Price (Read-only) */}
               <div className="space-y-2">
-                <Label>Tổng giá trị</Label>
+                <Label>{ot.totalValue}</Label>
                 <Input
                   value={formData.totalPrice.toLocaleString('vi-VN') + ' VNĐ'}
                   readOnly
@@ -540,7 +544,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
               {/* Discount */}
               <div className="space-y-2">
-                <Label htmlFor="discount">Giảm giá (%)</Label>
+                <Label htmlFor="discount">{ot.discountPercent}</Label>
                 <Input
                   id="discount"
                   type="number"
@@ -553,52 +557,52 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
               {/* Buyer Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullname">Tên người mua *</Label>
+                  <Label htmlFor="fullname">{ot.customerName} {ot.required}</Label>
                   <Input
                     id="fullname"
                     value={formData.fullname}
                     onChange={(e) => handleInputChange('fullname', e.target.value)}
-                    placeholder="Nguyễn Văn A"
+                    placeholder={ot.customerNamePlaceholder}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phonenumber">Số điện thoại *</Label>
+                  <Label htmlFor="phonenumber">{ot.customerPhone} {ot.required}</Label>
                   <Input
                     id="phonenumber"
                     value={formData.phonenumber}
                     onChange={(e) => handleInputChange('phonenumber', e.target.value)}
-                    placeholder="0901234567"
+                    placeholder={ot.customerPhonePlaceholder}
                     required
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">Email {ot.required}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="email@example.com"
+                  placeholder={ot.emailPlaceholder}
                   required
                 />
               </div>
 
               {/* Address */}
               <div className="space-y-2">
-                <Label htmlFor="houseNumber">Số nhà, đường *</Label>
+                <Label htmlFor="houseNumber">{ot.address} {ot.required}</Label>
                 <Input
                   id="houseNumber"
                   value={formData.houseNumber}
                   onChange={(e) => handleInputChange('houseNumber', e.target.value)}
-                  placeholder="VD: 123 Nguyễn Huệ"
+                  placeholder={ot.addressPlaceholder}
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tỉnh/Thành phố *</Label>
+                  <Label>{ot.province} {ot.required}</Label>
                   <Select
                     value={formData.provinceCode}
                     onValueChange={(value) => {
@@ -609,7 +613,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Chọn Tỉnh/Thành phố *" />
+                      <SelectValue placeholder={ot.selectProvince} />
                     </SelectTrigger>
                     <SelectContent>
                       {provinces.map(province => (
@@ -621,7 +625,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Phường/Xã *</Label>
+                  <Label>{ot.district} {ot.required}</Label>
                   <Select
                     value={formData.wardCode}
                     onValueChange={(value) => {
@@ -633,7 +637,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Chọn Phường/Xã *" />
+                      <SelectValue placeholder={ot.selectDistrict} />
                     </SelectTrigger>
                     <SelectContent>
                       {wardOptions.map(ward => (
@@ -648,18 +652,18 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
               {/* Payment Method */}
               <div className="space-y-2">
-                <Label>Phương thức thanh toán *</Label>
+                <Label>{ot.paymentMethod} {ot.required}</Label>
                 <Select
                   value={formData.paymentMethod.toString()}
                   onValueChange={(value) => handleInputChange('paymentMethod', parseInt(value))}
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn phương thức thanh toán *" />
+                    <SelectValue placeholder={ot.selectPaymentMethod} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Tiền mặt</SelectItem>
-                    <SelectItem value="2">Chuyển khoản</SelectItem>
+                    <SelectItem value="1">{ot.cash}</SelectItem>
+                    <SelectItem value="2">{ot.bankTransfer}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -668,7 +672,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
               {formData.paymentMethod === 2 && (
                 <>
                   <div className="space-y-2">
-                    <Label>Ngân hàng *</Label>
+                    <Label>{ot.bankName} {ot.required}</Label>
                     <Select
                       value={formData.bankCode}
                       onValueChange={(value) => {
@@ -679,7 +683,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn ngân hàng *" />
+                        <SelectValue placeholder={ot.selectBank} />
                       </SelectTrigger>
                       <SelectContent>
                         {bankOptions.map(bank => (
@@ -691,12 +695,12 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bankNum">Số tài khoản *</Label>
+                    <Label htmlFor="bankNum">{ot.accountNumber} {ot.required}</Label>
                     <Input
                       id="bankNum"
                       value={formData.bankNum}
                       onChange={(e) => handleInputChange('bankNum', e.target.value)}
-                      placeholder="Nhập số tài khoản"
+                      placeholder={ot.accountNumberPlaceholder}
                       required
                     />
                   </div>
@@ -706,46 +710,46 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
               {/* Note */}
               <div className="space-y-2">
-                <Label htmlFor="note">Ghi chú</Label>
+                <Label htmlFor="note">{ot.notes}</Label>
                 <Input
                   id="note"
                   value={formData.note}
                   onChange={(e) => handleInputChange('note', e.target.value)}
-                  placeholder="Ghi chú thêm về đơn hàng"
+                  placeholder={ot.notesPlaceholder}
                 />
               </div>
 
               {/* Optional Technical Fields */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Thông tin kỹ thuật (tuỳ chọn)</h3>
+                <h3 className="text-lg font-medium">{ot.technicalInfo}</h3>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="shopToken">Shop Token</Label>
+                  <Label htmlFor="shopToken">{ot.shopToken}</Label>
                   <Input
                     id="shopToken"
                     value={formData.shopToken}
                     onChange={(e) => handleInputChange('shopToken', e.target.value)}
-                    placeholder="Nhập Shop Token nếu có"
+                    placeholder={ot.shopTokenPlaceholder}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="qrcodeUrl">QR Code URL</Label>
+                  <Label htmlFor="qrcodeUrl">{ot.qrCodeUrl}</Label>
                   <Input
                     id="qrcodeUrl"
                     value={formData.qrcodeUrl}
                     onChange={(e) => handleInputChange('qrcodeUrl', e.target.value)}
-                    placeholder="Nhập QR Code URL nếu có"
+                    placeholder={ot.qrCodeUrlPlaceholder}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sepayApiKey">Sepay API Key</Label>
+                  <Label htmlFor="sepayApiKey">{ot.sepayApiKey}</Label>
                   <Input
                     id="sepayApiKey"
                     value={formData.sepayApiKey}
                     onChange={(e) => handleInputChange('sepayApiKey', e.target.value)}
-                    placeholder="Nhập Sepay API Key nếu có"
+                    placeholder={ot.sepayApiKeyPlaceholder}
                   />
                 </div>
               </div>
@@ -753,10 +757,10 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Hủy
+                {ot.cancel}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Đang tạo...' : 'Tạo đơn hàng'}
+                {isSubmitting ? ot.creating : ot.create}
               </Button>
             </DialogFooter>
           </form>
@@ -782,7 +786,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                     </svg>
                   </div>
                 )}
-                {notification.type === 'success' ? 'Thành công' : 'Lỗi'}
+                {notification.type === 'success' ? ot.success : ot.error}
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
@@ -850,7 +854,7 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                   Copy QR Code
                 </Button>
                 <Button onClick={() => setQrModal(prev => ({ ...prev, show: false }))}>
-                  Đóng
+                  {ot.close}
                 </Button>
               </div>
             </div>

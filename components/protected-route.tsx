@@ -3,6 +3,8 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
+import { useLanguage } from "@/contexts/language-context"
+import { uiTranslations } from "@/lib/ui-i18n"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -10,6 +12,8 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, initialized } = useAuth()
+  const { language } = useLanguage()
+  const ui = uiTranslations[language]
   const router = useRouter()
 
   useEffect(() => {
@@ -22,8 +26,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Đang kiểm tra quyền truy cập...</h2>
-          <p className="text-muted-foreground">Vui lòng chờ trong giây lát</p>
+          <h2 className="text-2xl font-bold">{ui.checkingAccess}</h2>
+          <p className="text-muted-foreground">{ui.pleaseWait}</p>
         </div>
       </div>
     )
@@ -33,8 +37,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Đang kiểm tra quyền truy cập...</h2>
-          <p className="text-muted-foreground">Vui lòng đăng nhập để tiếp tục</p>
+          <h2 className="text-2xl font-bold">{ui.checkingAccess}</h2>
+          <p className="text-muted-foreground">{ui.pleaseLogin}</p>
         </div>
       </div>
     )

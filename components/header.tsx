@@ -18,49 +18,58 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useState } from "react"
-
-// Sample notification data
-const sampleNotifications = [
-  {
-    id: 1,
-    title: "Đơn hàng mới",
-    message: "Bạn có đơn hàng mới #12345 từ cửa hàng ABC",
-    time: "2 phút trước",
-    type: "order",
-    read: false
-  },
-  {
-    id: 2,
-    title: "Khuyến mãi",
-    message: "Giảm giá 20% cho tất cả sản phẩm điện tử",
-    time: "1 giờ trước",
-    type: "promotion",
-    read: false
-  },
-  {
-    id: 3,
-    title: "Hệ thống",
-    message: "Hệ thống sẽ bảo trì vào lúc 2:00 sáng mai",
-    time: "3 giờ trước",
-    type: "system",
-    read: true
-  },
-  {
-    id: 4,
-    title: "Thanh toán thành công",
-    message: "Giao dịch #67890 đã được xử lý thành công",
-    time: "1 ngày trước",
-    type: "payment",
-    read: true
-  }
-]
+import { uiTranslations } from "@/lib/ui-i18n"
+import { useEffect, useCallback } from "react"
 
 export function Header() {
   const { toggle } = useSidebar()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const ui = uiTranslations[language]
   const { logout } = useAuth()
   const router = useRouter()
-  const [notifications, setNotifications] = useState(sampleNotifications)
+  
+  // Create dynamic notifications based on language
+  const getSampleNotifications = useCallback(() => [
+    {
+      id: 1,
+      title: ui.newOrder,
+      message: ui.newOrderMessage,
+      time: ui.twoMinutesAgo,
+      type: "order",
+      read: false
+    },
+    {
+      id: 2,
+      title: ui.promotion,
+      message: ui.promotionMessage,
+      time: ui.oneHourAgo,
+      type: "promotion",
+      read: false
+    },
+    {
+      id: 3,
+      title: ui.system,
+      message: ui.systemMessage,
+      time: ui.threeHoursAgo,
+      type: "system",
+      read: true
+    },
+    {
+      id: 4,
+      title: ui.paymentSuccess,
+      message: ui.paymentSuccessMessage,
+      time: ui.oneDayAgo,
+      type: "payment",
+      read: true
+    }
+  ], [ui])
+  
+  const [notifications, setNotifications] = useState<any[]>([])
+
+  // Update notifications when language changes
+  useEffect(() => {
+    setNotifications(getSampleNotifications())
+  }, [getSampleNotifications])
 
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -139,7 +148,7 @@ export function Header() {
           <DropdownMenuContent align="end" className="w-80">
             <div className="flex items-center justify-between p-2">
               <DropdownMenuLabel className="text-base font-semibold">
-                Thông báo ({unreadCount} chưa đọc)
+                {ui.notifications} ({unreadCount} {ui.unread})
               </DropdownMenuLabel>
               {unreadCount > 0 && (
                 <Button 
@@ -148,7 +157,7 @@ export function Header() {
                   onClick={markAllAsRead}
                   className="text-xs text-blue-600 hover:text-blue-700"
                 >
-                  Đánh dấu tất cả đã đọc
+                  {ui.markAllAsRead}
                 </Button>
               )}
             </div>
@@ -156,7 +165,7 @@ export function Header() {
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-4 text-center text-muted-foreground">
-                  Không có thông báo nào
+                  {ui.noNotifications}
                 </div>
               ) : (
                 notifications.map((notification) => (
@@ -193,7 +202,7 @@ export function Header() {
                     variant="ghost" 
                     className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
                   >
-                    Xem tất cả thông báo
+                    {ui.viewAllNotifications}
                   </Button>
                 </div>
               </>

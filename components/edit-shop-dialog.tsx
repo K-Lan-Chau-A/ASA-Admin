@@ -23,6 +23,8 @@ import { useState, useEffect, useMemo } from "react"
 import API_URL from "@/config/api"
 import provinces from "@/constant/donViHanhChinh34TinhThanh.json"
 import vietQrBanks from "@/constant/vietQrBank.json"
+import { useLanguage } from "@/contexts/language-context"
+import { shopsTranslations } from "@/lib/shops-i18n"
 
 type ShopDetail = {
   shopId: number
@@ -68,6 +70,8 @@ type EditShopDialogProps = {
 }
 
 export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: EditShopDialogProps) {
+  const { language } = useLanguage()
+  const st = shopsTranslations[language]
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     shopName: '',
@@ -181,10 +185,10 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
 
       onOpenChange(false)
       onShopUpdated()
-      alert('Cập nhật cửa hàng thành công!')
+      alert(st.updateSuccess)
     } catch (err) {
       console.error('Update shop failed:', err)
-      alert('Cập nhật cửa hàng thất bại. Vui lòng thử lại sau.')
+      alert(st.updateError)
     } finally {
       setIsSubmitting(false)
     }
@@ -196,10 +200,10 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
-            Chỉnh sửa cửa hàng
+            {st.editShop}
           </DialogTitle>
           <DialogDescription>
-            Cập nhật thông tin cửa hàng {shop.shopName}
+            {st.editShopDescription} {shop.shopName}
           </DialogDescription>
         </DialogHeader>
         
@@ -208,22 +212,22 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
             {/* Shop Name and Owner Name */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="shopName">Tên cửa hàng *</Label>
+                <Label htmlFor="shopName">{st.shopName} {st.required}</Label>
                 <Input
                   id="shopName"
                   value={formData.shopName}
                   onChange={(e) => handleInputChange('shopName', e.target.value)}
-                  placeholder="VD: Cửa hàng ABC"
+                  placeholder={st.shopNamePlaceholder}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="fullname">Tên chủ cửa hàng *</Label>
+                <Label htmlFor="fullname">{st.ownerName} {st.required}</Label>
                 <Input
                   id="fullname"
                   value={formData.fullname}
                   onChange={(e) => handleInputChange('fullname', e.target.value)}
-                  placeholder="VD: Nguyễn Văn A"
+                  placeholder={st.ownerNamePlaceholder}
                   required
                 />
               </div>
@@ -232,24 +236,24 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
             {/* Phone and Email */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="phonenumber">Số điện thoại *</Label>
+                <Label htmlFor="phonenumber">{st.phoneNumber} {st.required}</Label>
                 <Input
                   id="phonenumber"
                   type="tel"
                   value={formData.phonenumber}
                   onChange={(e) => handleInputChange('phonenumber', e.target.value)}
-                  placeholder="VD: 0901234567"
+                  placeholder={st.phonePlaceholder}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{st.email} {st.required}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="VD: abc@gmail.com"
+                  placeholder={st.emailPlaceholder}
                   required
                 />
               </div>
@@ -257,19 +261,19 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
 
             {/* Address */}
             <div className="space-y-2">
-              <Label htmlFor="houseNumber">Số nhà, đường *</Label>
+              <Label htmlFor="houseNumber">{st.address} {st.required}</Label>
               <Input
                 id="houseNumber"
                 value={formData.houseNumber}
                 onChange={(e) => handleInputChange('houseNumber', e.target.value)}
-                placeholder="VD: 123 Nguyễn Huệ"
+                placeholder={st.addressPlaceholder}
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Tỉnh/Thành *</Label>
+                <Label>{st.province} {st.required}</Label>
                 <Select
                   value={formData.provinceCode}
                   onValueChange={(value) => {
@@ -279,7 +283,7 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
                   required
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn Tỉnh/Thành" />
+                    <SelectValue placeholder={st.selectProvince} />
                   </SelectTrigger>
                   <SelectContent>
                     {provinces.map(p => (
@@ -289,7 +293,7 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Phường/Xã *</Label>
+                <Label>{st.district} {st.required}</Label>
                 <Select
                   value={formData.wardCode}
                   onValueChange={(value) => handleInputChange('wardCode', value)}
@@ -297,7 +301,7 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
                   disabled={!wardOptions.length}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Chọn Phường/Xã" />
+                    <SelectValue placeholder={st.selectDistrict} />
                   </SelectTrigger>
                   <SelectContent>
                     {wardOptions.map(w => (
@@ -310,13 +314,13 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
 
             {/* Bank Info */}
             <div className="space-y-2">
-              <Label>Ngân hàng</Label>
+              <Label>{st.bankName}</Label>
               <Select
                 value={formData.bankCode}
                 onValueChange={(value) => handleInputChange('bankCode', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn ngân hàng (tuỳ chọn)" />
+                  <SelectValue placeholder={st.selectBank} />
                 </SelectTrigger>
                 <SelectContent>
                   {bankOptions.map(b => (
@@ -327,64 +331,64 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bankNum">Số tài khoản</Label>
+              <Label htmlFor="bankNum">{st.accountNumber}</Label>
               <Input
                 id="bankNum"
                 value={formData.bankNum}
                 onChange={(e) => handleInputChange('bankNum', e.target.value)}
-                placeholder="Nhập số tài khoản"
+                placeholder={st.accountNumberPlaceholder}
               />
             </div>
 
             {/* Status */}
             <div className="space-y-2">
-              <Label>Trạng thái</Label>
+              <Label>{st.status}</Label>
               <Select
                 value={formData.status.toString()}
                 onValueChange={(value) => handleInputChange('status', parseInt(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Chọn trạng thái" />
+                  <SelectValue placeholder={st.selectStatus} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Không hoạt động</SelectItem>
-                  <SelectItem value="1">Hoạt động</SelectItem>
-                  <SelectItem value="2">Dùng thử</SelectItem>
+                  <SelectItem value="0">{st.inactive}</SelectItem>
+                  <SelectItem value="1">{st.active}</SelectItem>
+                  <SelectItem value="2">{st.trial}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Technical Fields */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Thông tin kỹ thuật</h3>
+              <h3 className="text-lg font-medium">{st.technicalInfo}</h3>
               
               <div className="space-y-2">
-                <Label htmlFor="shopToken">Shop Token</Label>
+                <Label htmlFor="shopToken">{st.shopToken}</Label>
                 <Input
                   id="shopToken"
                   value={formData.shopToken}
                   onChange={(e) => handleInputChange('shopToken', e.target.value)}
-                  placeholder="Nhập Shop Token"
+                  placeholder={st.shopTokenPlaceholder}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="qrcodeUrl">QR Code URL</Label>
+                <Label htmlFor="qrcodeUrl">{st.qrCodeUrl}</Label>
                 <Input
                   id="qrcodeUrl"
                   value={formData.qrcodeUrl}
                   onChange={(e) => handleInputChange('qrcodeUrl', e.target.value)}
-                  placeholder="Nhập QR Code URL"
+                  placeholder={st.qrCodeUrlPlaceholder}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sepayApiKey">Sepay API Key</Label>
+                <Label htmlFor="sepayApiKey">{st.sepayApiKey}</Label>
                 <Input
                   id="sepayApiKey"
                   value={formData.sepayApiKey}
                   onChange={(e) => handleInputChange('sepayApiKey', e.target.value)}
-                  placeholder="Nhập Sepay API Key"
+                  placeholder={st.sepayApiKeyPlaceholder}
                 />
               </div>
             </div>
@@ -392,10 +396,10 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Hủy
+              {st.cancel}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+              {isSubmitting ? st.updating : st.update}
             </Button>
           </DialogFooter>
         </form>

@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,32 +18,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { UserPlus, Upload, X } from "lucide-react"
+import { Upload, X, Edit } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import API_URL from "@/config/api"
 import { toast } from "@/hooks/use-toast"
 import { usersTranslations } from "@/lib/users-i18n"
 
-interface CreateUserDialogProps {
-  onUserCreated?: () => void
+interface User {
+  userId: number
+  username: string
+  fullName: string
+  email: string
+  phoneNumber: string
+  status: number
+  role: number
+  avatar?: string
 }
 
-export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
+interface EditUserDialogProps {
+  user: User | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onUserUpdated?: () => void
+}
+
+export function EditUserDialog({ user, open, onOpenChange, onUserUpdated }: EditUserDialogProps) {
   const { language } = useLanguage()
   const ut = usersTranslations[language]
-  const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     username: '',
-    password: '',
     email: '',
     fullName: '',
     phoneNumber: '',
-    role: '1', // 1: Admin, 2: Staff
+    role: '1',
   })
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username || '',
+        email: user.email || '',
+        fullName: user.fullName || '',
+        phoneNumber: user.phoneNumber || '',
+        role: String(user.role || 1),
+      })
+      setAvatarPreview(user.avatar || null)
+      setAvatarFile(null)
+    }
+  }, [user])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -70,8 +95,10 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!user) return
+
     // Validation
-    if (!formData.username || !formData.password || !formData.email || !formData.fullName || !formData.phoneNumber) {
+    if (!formData.username || !formData.email || !formData.fullName || !formData.phoneNumber) {
       toast({
         title: ut.error,
         description: ut.fillAllFields,
@@ -84,7 +111,6 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
     try {
       const formDataToSend = new FormData()
       formDataToSend.append('username', formData.username)
-      formDataToSend.append('password', formData.password)
       formDataToSend.append('email', formData.email)
       formDataToSend.append('fullName', formData.fullName)
       formDataToSend.append('phoneNumber', formData.phoneNumber)
@@ -94,33 +120,23 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
         formDataToSend.append('avatarFile', avatarFile)
       }
 
-      const response = await fetch(`${API_URL}/api/users`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/api/users/${user.userId}`, {
+        method: 'PUT',
         body: formDataToSend,
       })
 
       if (response.ok) {
         toast({
           title: ut.success,
-          description: ut.createSuccess
+          description: ut.updateSuccess
         })
-        setOpen(false)
-        setFormData({
-          username: '',
-          password: '',
-          email: '',
-          fullName: '',
-          phoneNumber: '',
-          role: '1',
-        })
-        setAvatarFile(null)
-        setAvatarPreview(null)
-        onUserCreated?.()
+        onOpenChange(false)
+        onUserUpdated?.()
       } else {
         const errorData = await response.json().catch(() => ({}))
         toast({
           title: ut.error,
-          description: errorData.message || ut.createError,
+          description: errorData.message || ut.updateError,
           variant: "destructive"
         })
       }
@@ -135,19 +151,18 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
     }
   }
 
+  if (!user) return null
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
-          {ut.addEmployee}
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>{ut.createUser}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Edit className="h-5 w-5" />
+            {ut.editUser}
+          </DialogTitle>
           <DialogDescription>
-            {ut.createUserDescription}
+            {ut.editUserDescription} {user.fullName || user.username}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -161,20 +176,6 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                 value={formData.username}
                 onChange={(e) => handleInputChange('username', e.target.value)}
                 placeholder={ut.usernamePlaceholder}
-                className="col-span-3"
-                required
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="password" className="text-right">
-                {ut.password} {ut.required}
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder={ut.passwordPlaceholder}
                 className="col-span-3"
                 required
               />
@@ -245,14 +246,33 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
                       alt="Avatar preview" 
                       className="w-16 h-16 rounded-full object-cover"
                     />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={removeAvatar}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    <div className="flex flex-col gap-1">
+                      <input
+                        id="avatar"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('avatar')?.click()}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {ut.changeImage}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={removeAvatar}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        {ut.removeImage}
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -278,11 +298,11 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {ut.cancel}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? ut.creating : ut.create}
+              {loading ? ut.updating : ut.update}
             </Button>
           </DialogFooter>
         </form>

@@ -25,6 +25,7 @@ import { useState, useMemo, useEffect } from "react"
 import API_URL from "@/config/api"
 import provinces from "@/constant/donViHanhChinh34TinhThanh.json"
 import vietQrBanks from "@/constant/vietQrBank.json"
+import { shopsTranslations } from "@/lib/shops-i18n"
 
 type FormData = {
   businessName: string
@@ -74,7 +75,8 @@ type CreateShopDialogProps = {
 }
 
 export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateShopDialogProps) {
-  const { t } = useLanguage()
+  const { language } = useLanguage()
+  const st = shopsTranslations[language]
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [products, setProducts] = useState<Product[]>([])
@@ -187,7 +189,7 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
     
     // Validate product only when not in trial mode
     if (!trialMode && formData.productId === 0) {
-      showNotification('error', 'Vui lòng chọn gói sản phẩm')
+      showNotification('error', st.fillAllFields)
       return
     }
     
@@ -258,10 +260,10 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
         onShopCreated()
       }
 
-      showNotification('success', 'Tạo cửa hàng thành công!')
+      showNotification('success', st.createSuccess)
     } catch (err) {
       console.error('Create shop failed:', err)
-      showNotification('error', 'Tạo cửa hàng thất bại. Vui lòng thử lại sau.')
+      showNotification('error', st.createError)
     } finally {
       setIsSubmitting(false)
     }
@@ -273,17 +275,17 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
         <DialogTrigger asChild>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            {t('shops.addShop')}
+            {st.addShop}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Store className="h-5 w-5" />
-              Tạo cửa hàng mới
+              {st.createShop}
             </DialogTitle>
             <DialogDescription>
-              Thêm cửa hàng mới vào hệ thống với đầy đủ thông tin.
+              {st.createShopDescription}
             </DialogDescription>
           </DialogHeader>
           
@@ -292,22 +294,22 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
               {/* Shop Name and Owner Name */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="businessName">Tên cửa hàng *</Label>
+                  <Label htmlFor="businessName">{st.shopName} {st.required}</Label>
                   <Input
                     id="businessName"
                     value={formData.businessName}
                     onChange={(e) => handleInputChange('businessName', e.target.value)}
-                    placeholder="VD: Cửa hàng ABC"
+                    placeholder={st.shopNamePlaceholder}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="ownerName">Tên chủ cửa hàng *</Label>
+                  <Label htmlFor="ownerName">{st.ownerName} {st.required}</Label>
                   <Input
                     id="ownerName"
                     value={formData.ownerName}
                     onChange={(e) => handleInputChange('ownerName', e.target.value)}
-                    placeholder="VD: Nguyễn Văn A"
+                    placeholder={st.ownerNamePlaceholder}
                     required
                   />
                 </div>
@@ -316,24 +318,24 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
               {/* Phone and Email */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Số điện thoại *</Label>
+                  <Label htmlFor="phone">{st.phoneNumber} {st.required}</Label>
                   <Input
                     id="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="VD: 0901234567"
+                    placeholder={st.phonePlaceholder}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
+                  <Label htmlFor="email">{st.email} {st.required}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    placeholder="VD: abc@gmail.com"
+                    placeholder={st.emailPlaceholder}
                     required
                   />
                 </div>
@@ -341,26 +343,26 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
 
               {/* Address */}
               <div className="space-y-2">
-                <Label htmlFor="houseNumber">Số nhà, đường *</Label>
+                <Label htmlFor="houseNumber">{st.address} {st.required}</Label>
                 <Input
                   id="houseNumber"
                   value={formData.houseNumber}
                   onChange={(e) => handleInputChange('houseNumber', e.target.value)}
-                  placeholder="VD: 123 Nguyễn Huệ"
+                  placeholder={st.addressPlaceholder}
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tỉnh/Thành *</Label>
+                  <Label>{st.province} {st.required}</Label>
                   <Select
                     value={formData.provinceCode}
                     onValueChange={(value) => handleInputChange('provinceCode', value)}
                     required
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Chọn Tỉnh/Thành" />
+                      <SelectValue placeholder={st.selectProvince} />
                     </SelectTrigger>
                     <SelectContent>
                       {provinces.map(p => (
@@ -370,7 +372,7 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Phường/Xã *</Label>
+                  <Label>{st.district} {st.required}</Label>
                   <Select
                     value={formData.wardCode}
                     onValueChange={(value) => {
@@ -382,7 +384,7 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
                     disabled={!wardOptions.length}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Chọn Phường/Xã" />
+                      <SelectValue placeholder={st.selectDistrict} />
                     </SelectTrigger>
                     <SelectContent>
                       {wardOptions.map(w => (
@@ -396,13 +398,13 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
               {/* Bank Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Ngân hàng</Label>
+                  <Label>{st.bankName}</Label>
                   <Select
                     value={formData.bankCode}
                     onValueChange={(value) => handleInputChange('bankCode', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Chọn ngân hàng (tuỳ chọn)" />
+                      <SelectValue placeholder={st.selectBank} />
                     </SelectTrigger>
                     <SelectContent>
                       {bankOptions.map(b => (
@@ -412,12 +414,12 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bankNum">Số tài khoản</Label>
+                  <Label htmlFor="bankNum">{st.accountNumber}</Label>
                   <Input
                     id="bankNum"
                     value={formData.bankNum}
                     onChange={(e) => handleInputChange('bankNum', e.target.value)}
-                    placeholder="Nhập số tài khoản"
+                    placeholder={st.accountNumberPlaceholder}
                   />
                 </div>
               </div>
@@ -426,53 +428,53 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
               <div className="grid grid-cols-2 gap-4">
                 {/* Technical optional fields shown here for convenience */}
                 <div className="space-y-2">
-                  <Label htmlFor="shopToken">Shop Token (tuỳ chọn)</Label>
+                  <Label htmlFor="shopToken">{st.shopToken}</Label>
                   <Input
                     id="shopToken"
                     value={formData.shopToken || ''}
                     onChange={(e) => handleInputChange('shopToken', e.target.value)}
-                    placeholder="Nhập Shop Token nếu có"
+                    placeholder={st.shopTokenPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="qrcodeUrl">QR Code URL (tuỳ chọn)</Label>
+                  <Label htmlFor="qrcodeUrl">{st.qrCodeUrl}</Label>
                   <Input
                     id="qrcodeUrl"
                     value={formData.qrcodeUrl || ''}
                     onChange={(e) => handleInputChange('qrcodeUrl', e.target.value)}
-                    placeholder="Nhập URL QR nếu có"
+                    placeholder={st.qrCodeUrlPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sepayApiKey">Sepay API Key (tuỳ chọn)</Label>
+                  <Label htmlFor="sepayApiKey">{st.sepayApiKey}</Label>
                   <Input
                     id="sepayApiKey"
                     value={formData.sepayApiKey || ''}
                     onChange={(e) => handleInputChange('sepayApiKey', e.target.value)}
-                    placeholder="Nhập Sepay API Key nếu có"
+                    placeholder={st.sepayApiKeyPlaceholder}
                   />
                 </div>
                 {!trialMode && (
                   <div className="space-y-2">
-                    <Label>Trạng thái</Label>
+                    <Label>{st.status}</Label>
                     <Select
                       value={formData.status.toString()}
                       onValueChange={(value) => handleInputChange('status', parseInt(value))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Chọn trạng thái" />
+                        <SelectValue placeholder={st.selectStatus} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="0">Không hoạt động</SelectItem>
-                        <SelectItem value="1">Hoạt động</SelectItem>
-                        <SelectItem value="2">Dùng thử</SelectItem>
+                        <SelectItem value="0">{st.inactive}</SelectItem>
+                        <SelectItem value="1">{st.active}</SelectItem>
+                        <SelectItem value="2">{st.trial}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 )}
                 {!trialMode && (
                   <div className="space-y-2">
-                    <Label>Gói sản phẩm *</Label>
+                    <Label>{st.productPackage} {st.required}</Label>
                     <Select
                       value={formData.productId === 0 ? "" : formData.productId.toString()}
                       onValueChange={(value) => handleInputChange('productId', parseInt(value))}
@@ -480,7 +482,7 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={loadingProducts ? "Đang tải..." : "Chọn gói sản phẩm *"} />
+                        <SelectValue placeholder={loadingProducts ? st.loadingPackages : st.selectPackage} />
                       </SelectTrigger>
                       <SelectContent>
                         {products.map(product => (
@@ -497,10 +499,10 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Hủy
+                {st.cancel}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Đang tạo...' : (trialMode ? 'Tạo cửa hàng dùng thử' : 'Tạo cửa hàng')}
+                {isSubmitting ? st.creating : (trialMode ? st.createTrial : st.create)}
               </Button>
             </DialogFooter>
           </form>
@@ -526,7 +528,7 @@ export function CreateShopDialog({ onShopCreated, trialMode = false }: CreateSho
                     </svg>
                   </div>
                 )}
-                {notification.type === 'success' ? 'Thành công' : 'Lỗi'}
+                {notification.type === 'success' ? st.success : st.error}
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">

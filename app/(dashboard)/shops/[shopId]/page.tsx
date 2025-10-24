@@ -9,6 +9,7 @@ import API_URL from "@/config/api"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { EditShopDialog } from "@/components/edit-shop-dialog"
+import { shopsTranslations } from "@/lib/shops-i18n"
 
 type ShopDetail = {
   shopId: number
@@ -31,7 +32,8 @@ type ShopDetail = {
 }
 
 export default function ShopDetailPage() {
-  const { t } = useLanguage()
+  const { language } = useLanguage()
+  const st = shopsTranslations[language]
   const params = useParams()
   const router = useRouter()
   const shopId = params.shopId as string
@@ -77,18 +79,18 @@ export default function ShopDetailPage() {
   const getStatusInfo = (status: number) => {
     switch (status) {
       case 0:
-        return { text: 'Không hoạt động', variant: 'secondary' as const }
+        return { text: st.inactive, variant: 'secondary' as const }
       case 1:
-        return { text: 'Hoạt động', variant: 'default' as const }
+        return { text: st.active, variant: 'default' as const }
       case 2:
-        return { text: 'Dùng thử', variant: 'secondary' as const }
+        return { text: st.trial, variant: 'secondary' as const }
       default:
-        return { text: 'Không xác định', variant: 'destructive' as const }
+        return { text: st.unknown, variant: 'destructive' as const }
     }
   }
 
   const formatDate = (dateString?: string | null) => {
-    if (!dateString) return 'Không có'
+    if (!dateString) return st.noData
     return new Date(dateString).toLocaleDateString('vi-VN')
   }
 
@@ -98,11 +100,11 @@ export default function ShopDetailPage() {
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại
+            {st.goBack}
           </Button>
         </div>
         <div className="text-center py-8">
-          <div className="text-muted-foreground">Đang tải thông tin cửa hàng...</div>
+          <div className="text-muted-foreground">{st.loadingShopInfo}</div>
         </div>
       </div>
     )
@@ -114,13 +116,13 @@ export default function ShopDetailPage() {
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại
+            {st.goBack}
           </Button>
         </div>
         <div className="text-center py-8">
-          <div className="text-red-600 mb-4">{error || 'Không tìm thấy cửa hàng'}</div>
+          <div className="text-red-600 mb-4">{error || st.shopNotFound}</div>
           <Button onClick={() => router.push('/shops')}>
-            Về danh sách cửa hàng
+            {st.backToShopList}
           </Button>
         </div>
       </div>
@@ -136,11 +138,11 @@ export default function ShopDetailPage() {
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={() => router.back()}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại
+            {st.goBack}
           </Button>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{shop.shopName}</h1>
-            <p className="text-muted-foreground">Chi tiết cửa hàng</p>
+            <p className="text-muted-foreground">{st.shopDetails}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -149,7 +151,7 @@ export default function ShopDetailPage() {
           </Badge>
           <Button onClick={() => setIsEditing(true)}>
             <Edit className="mr-2 h-4 w-4" />
-            Chỉnh sửa
+            {st.edit}
           </Button>
         </div>
       </div>
@@ -161,14 +163,14 @@ export default function ShopDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Store className="h-5 w-5" />
-              Thông tin cửa hàng
+              {st.shopInformation}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
               <User className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Chủ cửa hàng</p>
+                <p className="text-sm font-medium">{st.ownerName}</p>
                 <p className="text-sm text-muted-foreground">{shop.fullname}</p>
               </div>
             </div>
@@ -176,7 +178,7 @@ export default function ShopDetailPage() {
             <div className="flex items-center gap-3">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Số điện thoại</p>
+                <p className="text-sm font-medium">{st.phoneNumber}</p>
                 <p className="text-sm text-muted-foreground">{shop.phonenumber}</p>
               </div>
             </div>
@@ -184,16 +186,16 @@ export default function ShopDetailPage() {
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Email</p>
-                <p className="text-sm text-muted-foreground">{shop.email || 'Không có'}</p>
+                <p className="text-sm font-medium">{st.email}</p>
+                <p className="text-sm text-muted-foreground">{shop.email || st.noData}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Địa chỉ</p>
-                <p className="text-sm text-muted-foreground">{shop.address || 'Không có'}</p>
+                <p className="text-sm font-medium">{st.address}</p>
+                <p className="text-sm text-muted-foreground">{shop.address || st.noData}</p>
               </div>
             </div>
           </CardContent>
@@ -204,22 +206,22 @@ export default function ShopDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Gói dịch vụ & Trạng thái
+              {st.packageAndStatus}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3">
               <Package className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Gói sản phẩm</p>
-                <p className="text-sm text-muted-foreground">{shop.productType || 'Không có'}</p>
+                <p className="text-sm font-medium">{st.productPackage}</p>
+                <p className="text-sm text-muted-foreground">{shop.productType || st.noData}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Ngày đăng ký</p>
+                <p className="text-sm font-medium">{st.registrationDate}</p>
                 <p className="text-sm text-muted-foreground">{formatDate(shop.createdAt)}</p>
               </div>
             </div>
@@ -227,7 +229,7 @@ export default function ShopDetailPage() {
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Ngày hết hạn</p>
+                <p className="text-sm font-medium">{st.expirationDate}</p>
                 <p className="text-sm text-muted-foreground">{formatDate(shop.expiredAt)}</p>
               </div>
             </div>
@@ -235,7 +237,7 @@ export default function ShopDetailPage() {
             <div className="flex items-center gap-3">
               <Settings className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Trạng thái</p>
+                <p className="text-sm font-medium">{st.status}</p>
                 <Badge variant={statusInfo.variant} className="mt-1">
                   {statusInfo.text}
                 </Badge>
@@ -250,27 +252,27 @@ export default function ShopDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5" />
-                Thông tin ngân hàng
+                {st.bankInformation}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {shop.bankName && (
                 <div>
-                  <p className="text-sm font-medium">Tên ngân hàng</p>
+                  <p className="text-sm font-medium">{st.bankName}</p>
                   <p className="text-sm text-muted-foreground">{shop.bankName}</p>
                 </div>
               )}
 
               {shop.bankCode && (
                 <div>
-                  <p className="text-sm font-medium">Mã ngân hàng</p>
+                  <p className="text-sm font-medium">{st.bankCode}</p>
                   <p className="text-sm text-muted-foreground">{shop.bankCode}</p>
                 </div>
               )}
 
               {shop.bankNum && (
                 <div>
-                  <p className="text-sm font-medium">Số tài khoản</p>
+                  <p className="text-sm font-medium">{st.accountNumber}</p>
                   <p className="text-sm text-muted-foreground">{shop.bankNum}</p>
                 </div>
               )}
@@ -283,24 +285,24 @@ export default function ShopDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
-              Thông tin kỹ thuật
+              {st.technicalInfo}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
 
             <div>
-              <p className="text-sm font-medium">Shop Token</p>
-              <p className="text-sm text-muted-foreground font-mono">{shop.shopToken || t('common.none')}</p>
+              <p className="text-sm font-medium">{st.shopToken}</p>
+              <p className="text-sm text-muted-foreground font-mono">{shop.shopToken || st.noData}</p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">Sepay API Key</p>
-              <p className="text-sm text-muted-foreground font-mono">{shop.sepayApiKey || t('common.none')}</p>
+              <p className="text-sm font-medium">{st.sepayApiKey}</p>
+              <p className="text-sm text-muted-foreground font-mono">{shop.sepayApiKey || st.noData}</p>
             </div>
 
             <div>
-              <p className="text-sm font-medium">QR Code URL</p>
-              <p className="text-sm text-muted-foreground break-all">{shop.qrcodeUrl || t('common.none')}</p>
+              <p className="text-sm font-medium">{st.qrCodeUrl}</p>
+              <p className="text-sm text-muted-foreground break-all">{shop.qrcodeUrl || st.noData}</p>
             </div>
           </CardContent>
          </Card>
