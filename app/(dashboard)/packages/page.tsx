@@ -46,12 +46,14 @@ export default function PackagesPage() {
   const normalized = useMemo(() => {
     return products.map((p) => {
       const discountPercent = (p.promotionType === '%' && typeof p.promotionValue === 'number') ? p.promotionValue : undefined
+      const discountAmount = (p.promotionType === 'VND' && typeof p.promotionValue === 'number') ? p.promotionValue : undefined
       return {
         id: String(p.productId),
         name: p.productName,
         description: p.description || '',
         price: Number(p.price || 0),
         discount: discountPercent,
+        discountAmount: discountAmount,
         features: Array.isArray((p as any).features) ? (p as any).features : [],
       }
     })
@@ -80,10 +82,14 @@ export default function PackagesPage() {
         ) : (
           normalized.map((pkg) => (
             <Card key={pkg.id} className="relative hover:shadow-lg transition-shadow flex flex-col h-full">
-              {pkg.discount ? (
+              {(pkg.discount || pkg.discountAmount) ? (
                 <div className="absolute -top-3 -right-3">
                   <Badge variant="destructive" className="text-xs">
-                    {t('packages.discount')} {pkg.discount}%
+                    {pkg.discount ? (
+                      `${t('packages.discount')} ${pkg.discount}%`
+                    ) : (
+                      `${t('packages.discount')} ₫${pkg.discountAmount?.toLocaleString()}`
+                    )}
                   </Badge>
                 </div>
               ) : null}
@@ -108,7 +114,27 @@ export default function PackagesPage() {
                     <span className="text-muted-foreground">{t('packages.price')}:</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">₫{pkg.price.toLocaleString()}</div>
+                    {(() => {
+                      let finalPrice = pkg.price;
+                      if (pkg.discount) {
+                        // Percentage discount
+                        finalPrice = pkg.price * (1 - pkg.discount / 100);
+                      } else if (pkg.discountAmount) {
+                        // Fixed amount discount
+                        finalPrice = Math.max(0, pkg.price - pkg.discountAmount);
+                      }
+                      
+                      return (
+                        <div>
+                          {finalPrice !== pkg.price && (
+                            <div className="text-sm text-muted-foreground line-through">
+                              ₫{pkg.price.toLocaleString()}
+                            </div>
+                          )}
+                          <div className="text-2xl font-bold">₫{finalPrice.toLocaleString()}</div>
+                        </div>
+                      );
+                    })()}
                     {/* Billing cycle not available from API; omit */}
                   </div>
                 </div>
