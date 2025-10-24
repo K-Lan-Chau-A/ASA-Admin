@@ -152,10 +152,19 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
   })
 
   const handleInputChange = (field: keyof OrderFormData, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      }
+      
+      // Auto set status = 1 when payment method is cash (1)
+      if (field === 'paymentMethod' && value === 1) {
+        newData.status = 1
+      }
+      
+      return newData
+    })
   }
 
   const showNotification = (type: 'success' | 'error', message: string) => {
@@ -694,26 +703,6 @@ export function CreateOrderDialog({ onOrderCreated }: CreateOrderDialogProps) {
                 </>
               )}
 
-              {/* Order Status - hidden when bank transfer */}
-              {formData.paymentMethod !== 2 && (
-                <div className="space-y-2">
-                  <Label>Trạng thái đơn hàng *</Label>
-                  <Select
-                    value={formData.status.toString()}
-                    onValueChange={(value) => handleInputChange('status', parseInt(value))}
-                    required
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn trạng thái đơn hàng *" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Chờ thanh toán</SelectItem>
-                      <SelectItem value="1">Đã thanh toán</SelectItem>
-                      <SelectItem value="2">Đã hủy</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               {/* Note */}
               <div className="space-y-2">
