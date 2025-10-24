@@ -114,27 +114,7 @@ export default function PackagesPage() {
                     <span className="text-muted-foreground">{t('packages.price')}:</span>
                   </div>
                   <div className="text-right">
-                    {(() => {
-                      let finalPrice = pkg.price;
-                      if (pkg.discount) {
-                        // Percentage discount
-                        finalPrice = pkg.price * (1 - pkg.discount / 100);
-                      } else if (pkg.discountAmount) {
-                        // Fixed amount discount
-                        finalPrice = Math.max(0, pkg.price - pkg.discountAmount);
-                      }
-                      
-                      return (
-                        <div>
-                          {finalPrice !== pkg.price && (
-                            <div className="text-sm text-muted-foreground line-through">
-                              ₫{pkg.price.toLocaleString()}
-                            </div>
-                          )}
-                          <div className="text-2xl font-bold">₫{finalPrice.toLocaleString()}</div>
-                        </div>
-                      );
-                    })()}
+                    <div className="text-2xl font-bold">₫{pkg.price.toLocaleString()}</div>
                     {/* Billing cycle not available from API; omit */}
                   </div>
                 </div>
