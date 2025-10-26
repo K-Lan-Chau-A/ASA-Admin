@@ -7,6 +7,9 @@ import { Package, Check, Users, DollarSign, Settings } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import API_URL from "@/config/api"
 import { useEffect, useMemo, useState } from "react"
+import { CreatePackageDialog } from "@/components/create-package-dialog"
+import { EditPackageDialog } from "@/components/edit-package-dialog"
+import { toast } from "@/hooks/use-toast"
 
 type ApiFeature = { featureId: number; featureName: string; description?: string; isActive?: boolean }
 type ApiProduct = {
@@ -16,13 +19,23 @@ type ApiProduct = {
   price: number
   promotionValue?: number
   promotionType?: string // "%" or amount
+  requestLimit?: number
+  accountLimit?: number
+  discount?: number
+  status?: number
+  qrcodeUrl?: string
+  duration?: string
+  features?: ApiFeature[]
 }
 
 export default function PackagesPage() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [products, setProducts] = useState<Array<ApiProduct & { features: ApiFeature[] }>>([])
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedPackage, setSelectedPackage] = useState<ApiProduct & { features: ApiFeature[] } | null>(null)
 
   useEffect(() => {
     const run = async () => {
@@ -41,7 +54,77 @@ export default function PackagesPage() {
       }
     }
     run()
-  }, [])
+  }, [refreshKey])
+
+  const handlePackageCreated = () => {
+    setRefreshKey(prev => prev + 1)
+  }
+
+  const handleEditClick = (pkgId: string) => {
+    const productData = products.find(p => String(p.productId) === pkgId)
+    if (productData) {
+      setSelectedPackage(productData)
+      setEditDialogOpen(true)
+    }
+  }
+
+  const handlePackageUpdated = () => {
+    setEditDialogOpen(false)
+    setSelectedPackage(null)
+    setRefreshKey(prev => prev + 1)
+  }
+
+  const handleStatusToggle = async (pkgId: string) => {
+    const productData = products.find(p => String(p.productId) === pkgId)
+    if (!productData) return
+
+    const newStatus = (productData.status ?? 1) === 1 ? 0 : 1
+    
+    try {
+      const payload = {
+        productName: productData.productName,
+        description: productData.description || '',
+        price: productData.price,
+        requestLimit: productData.requestLimit || 0,
+        accountLimit: productData.accountLimit || 0,
+        discount: productData.discount || 0,
+        status: newStatus,
+        qrcodeUrl: productData.qrcodeUrl || '',
+        duration: productData.duration || '',
+        featureIds: (productData.features || []).map(f => f.featureId)
+      }
+
+      const response = await fetch(`${API_URL}/api/products/${productData.productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (response.ok) {
+        toast({
+          title: t('common.success'),
+          description: newStatus === 1 
+            ? (language === 'vi' ? 'Đã kích hoạt gói dịch vụ' : 'Package activated')
+            : (language === 'vi' ? 'Đã tạm dừng gói dịch vụ' : 'Package suspended')
+        })
+        setRefreshKey(prev => prev + 1)
+      } else {
+        toast({
+          title: t('common.error'),
+          description: language === 'vi' ? 'Không thể cập nhật trạng thái' : 'Failed to update status',
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      toast({
+        title: t('common.error'),
+        description: language === 'vi' ? 'Đã có lỗi xảy ra' : 'An error occurred',
+        variant: "destructive"
+      })
+    }
+  }
 
   const normalized = useMemo(() => {
     return products.map((p) => {
@@ -66,10 +149,7 @@ export default function PackagesPage() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('packages.title')}</h1>
           <p className="text-muted-foreground">{t('packages.subtitle')}</p>
         </div>
-        <Button>
-          <Package className="mr-2 h-4 w-4" />
-          {t('packages.createPackage')}
-        </Button>
+        <CreatePackageDialog onPackageCreated={handlePackageCreated} />
       </div>
 
       {error && (
@@ -137,12 +217,24 @@ export default function PackagesPage() {
 
                 <div className="pt-4 border-t mt-auto">
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleEditClick(pkg.id)}
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       {t('common.edit')}
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      {t('packages.currentlyActive')}
+                    <Button 
+                      variant={products.find(p => String(p.productId) === pkg.id)?.status === 1 ? "default" : "outline"}
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleStatusToggle(pkg.id)}
+                    >
+                      {products.find(p => String(p.productId) === pkg.id)?.status === 1 
+                        ? t('packages.currentlyActive')
+                        : (language === 'vi' ? 'Kích hoạt' : 'Activate')}
                     </Button>
                   </div>
                 </div>
@@ -174,6 +266,16 @@ export default function PackagesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Package Dialog */}
+      {selectedPackage && (
+        <EditPackageDialog
+          packageData={selectedPackage}
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onPackageUpdated={handlePackageUpdated}
+        />
+      )}
     </div>
   )
 }
