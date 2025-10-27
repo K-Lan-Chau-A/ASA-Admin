@@ -105,7 +105,7 @@ export function EditPackageDialog({ packageData, open, onOpenChange, onPackageUp
         discount: String(packageData.discount || 0),
         status: String(packageData.status || 1),
         qrcodeUrl: packageData.qrcodeUrl || '',
-        duration: packageData.duration || '',
+        duration: parseDurationFromAPI(packageData.duration || ''),
         featureIds: packageData.features?.map(f => f.featureId) || []
       })
     }
@@ -113,6 +113,18 @@ export function EditPackageDialog({ packageData, open, onOpenChange, onPackageUp
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  // Convert duration from API format (e.g., "30.00:00:00" -> "30")
+  const parseDurationFromAPI = (duration: string): string => {
+    if (!duration) return ''
+    // Extract day number from format like "30.00:00:00"
+    const match = duration.match(/^(\d+)\.\d+:\d+:\d+$/)
+    if (match) {
+      return match[1]
+    }
+    // If it's already just a number, return as-is
+    return duration
   }
 
   // Convert duration to API format (e.g., "30" -> "30.00:00:00")

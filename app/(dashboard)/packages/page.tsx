@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Package, Check, Users, DollarSign, Settings } from "lucide-react"
+import { Package, Check, Users, DollarSign, Settings, Clock } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import API_URL from "@/config/api"
 import { useEffect, useMemo, useState } from "react"
@@ -126,6 +126,16 @@ export default function PackagesPage() {
     }
   }
 
+  // Helper function to parse duration from API format (e.g., "30.00:00:00" -> "30")
+  const parseDuration = (duration: string | undefined): string => {
+    if (!duration) return ''
+    const match = duration.match(/^(\d+)\.\d+:\d+:\d+$/)
+    if (match) {
+      return match[1]
+    }
+    return duration
+  }
+
   const normalized = useMemo(() => {
     return products.map((p) => {
       const discountPercent = (p.promotionType === '%' && typeof p.promotionValue === 'number') ? p.promotionValue : undefined
@@ -137,7 +147,9 @@ export default function PackagesPage() {
         price: Number(p.price || 0),
         discount: discountPercent,
         discountAmount: discountAmount,
+        duration: parseDuration(p.duration),
         features: Array.isArray((p as any).features) ? (p as any).features : [],
+        status: p.status,
       }
     })
   }, [products])
@@ -199,6 +211,18 @@ export default function PackagesPage() {
                   </div>
                 </div>
 
+                {pkg.duration && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{language === 'vi' ? 'Thời hạn' : 'Duration'}:</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-semibold">{pkg.duration} {language === 'vi' ? 'ngày' : 'days'}</div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2 flex-1">
                   <div className="text-sm font-medium">{t('packages.featuresIncluded')}:</div>
                   <ul className="space-y-1">
@@ -227,12 +251,12 @@ export default function PackagesPage() {
                       {t('common.edit')}
                     </Button>
                     <Button 
-                      variant={products.find(p => String(p.productId) === pkg.id)?.status === 1 ? "default" : "outline"}
+                      variant={pkg.status === 1 ? "default" : "outline"}
                       size="sm" 
                       className="flex-1"
                       onClick={() => handleStatusToggle(pkg.id)}
                     >
-                      {products.find(p => String(p.productId) === pkg.id)?.status === 1 
+                      {pkg.status === 1 
                         ? t('packages.currentlyActive')
                         : (language === 'vi' ? 'Kích hoạt' : 'Activate')}
                     </Button>
