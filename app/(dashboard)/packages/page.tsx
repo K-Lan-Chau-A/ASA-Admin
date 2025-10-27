@@ -16,6 +16,7 @@ type ApiProduct = {
   productId: number
   productName: string
   description?: string
+  originalPrice?: number
   price: number
   promotionValue?: number
   promotionType?: string // "%" or amount
@@ -144,6 +145,7 @@ export default function PackagesPage() {
         id: String(p.productId),
         name: p.productName,
         description: p.description || '',
+        originalPrice: Number(p.originalPrice || 0),
         price: Number(p.price || 0),
         discount: discountPercent,
         discountAmount: discountAmount,
@@ -206,8 +208,18 @@ export default function PackagesPage() {
                     <span className="text-muted-foreground">{t('packages.price')}:</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">₫{pkg.price.toLocaleString()}</div>
-                    {/* Billing cycle not available from API; omit */}
+                    {pkg.originalPrice > 0 && pkg.originalPrice !== pkg.price ? (
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm text-muted-foreground line-through">
+                          {pkg.originalPrice.toLocaleString()}đ
+                        </div>
+                        <div className="text-2xl font-bold text-red-600">
+                          {pkg.price.toLocaleString()}đ
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-2xl font-bold">{pkg.price.toLocaleString()}đ</div>
+                    )}
                   </div>
                 </div>
 
