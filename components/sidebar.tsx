@@ -15,8 +15,8 @@ export function Sidebar() {
 
   const navItems = [
     { name: t('common.dashboard'), href: "/dashboard", icon: LayoutDashboard },
-    { name: t('common.shops'), href: "/shops", icon: Store, badge: "12" },
-    { name: t('common.users'), href: "/users", icon: Users, badge: "8" },
+    { name: t('common.shops'), href: "/shops", icon: Store},
+    { name: t('common.users'), href: "/users", icon: Users },
     { name: t('common.transactions'), href: "/transactions", icon: Wallet },
     { name: t('common.promotions'), href: "/promotions", icon: Gift },
     { name: t('common.packages'), href: "/packages", icon: Package },
@@ -74,11 +74,6 @@ export function Sidebar() {
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>
-                  {item.badge && (
-                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[0.625rem] font-medium text-primary-foreground">
-                      {item.badge}
-                    </span>
-                  )}
                 </Link>
               ))}
             </nav>
