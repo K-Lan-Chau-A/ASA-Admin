@@ -5,12 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StoreIcon, WalletIcon, PackageIcon, TrendingUpIcon } from "lucide-react"
 import { DashboardChart } from "@/components/dashboard-chart"
 import { RecentTransactions } from "@/components/recent-transactions"
+import { shopsTranslations } from "@/lib/shops-i18n"
 import { useLanguage } from "@/contexts/language-context"
 import { useState, useEffect } from 'react'
 import API_URL from '@/config/api'
 
 export default function DashboardPage() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+  const st = shopsTranslations[language]
   const [activeTab, setActiveTab] = useState('daily')
   const [reportData, setReportData] = useState({
     today: { newShops: 0, activeShops: 0, revenue: 0, premiumSold: 0 },
@@ -18,6 +20,7 @@ export default function DashboardPage() {
     month: { newShops: 0, activeShops: 0, revenue: 0, premiumSold: 0 }
   })
   const [loading, setLoading] = useState(true)
+  const [expiring, setExpiring] = useState<Array<{shopName:string; ownerName:string; currentPackageName:string; currentPackagePrice:number; expiredAt:string;}>>([])
 
   useEffect(() => {
     const fetchReportData = async () => {
@@ -37,6 +40,16 @@ export default function DashboardPage() {
     }
     
     fetchReportData()
+    const fetchExpiring = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/shops/expiring?top=5`)
+        if (res.ok) {
+          const json = await res.json().catch(() => [])
+          if (Array.isArray(json)) setExpiring(json)
+        }
+      } catch {}
+    }
+    fetchExpiring()
   }, [])
 
   // Format currency with dots as thousands separator
@@ -207,11 +220,33 @@ export default function DashboardPage() {
 
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle className="text-foreground">{t('dashboard.recentShopActivities')}</CardTitle>
-            <CardDescription>{t('dashboard.recentShopActivitiesSubtitle')}</CardDescription>
+            <CardTitle className="text-foreground">{st.expiringShopsTitle}</CardTitle>
+            <CardDescription>{st.expiringShopsSubtitle}</CardDescription>
           </CardHeader>
           <CardContent>
-            <RecentTransactions />
+            <div className="space-y-6">
+              {expiring.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                      {item.shopName?.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-medium text-foreground">{item.shopName}</div>
+                      <div className="text-xs text-muted-foreground">{item.ownerName} • {item.currentPackageName}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-foreground">{formatCurrency(item.currentPackagePrice)}</div>
+                    <div className="text-xs text-muted-foreground">{item.expiredAt}</div>
+                    <div className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">{st.expiringShopsBadge || st.expiringBadge}</div>
+                  </div>
+                </div>
+              ))}
+              {expiring.length === 0 && (
+                <div className="text-sm text-muted-foreground">{t('dashboard.noData') || 'Không có dữ liệu'}</div>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

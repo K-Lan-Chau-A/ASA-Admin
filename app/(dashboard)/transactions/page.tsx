@@ -15,6 +15,7 @@ interface Order {
   orderId: number
   shopId: number
   productId: number
+  productName: string
   userId: number
   totalPrice: number
   paymentMethod: string
@@ -360,7 +361,7 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell>
                         <Badge variant="outline">
-                          {getProductName(order.productId)}
+                          {order.productName || getProductName(order.productId)}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium">

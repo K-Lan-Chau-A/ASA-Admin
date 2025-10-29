@@ -21,6 +21,7 @@ import {
 import { Edit } from "lucide-react"
 import { useState, useEffect, useMemo } from "react"
 import API_URL from "@/config/api"
+import SELLER_API_URL from "@/config/sellerApi"
 import provinces from "@/constant/donViHanhChinh34TinhThanh.json"
 import vietQrBanks from "@/constant/vietQrBank.json"
 import { useLanguage } from "@/contexts/language-context"
@@ -73,6 +74,7 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
   const { language } = useLanguage()
   const st = shopsTranslations[language]
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [successOpen, setSuccessOpen] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     shopName: '',
     fullname: '',
@@ -161,40 +163,79 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
         address: buildAddress(),
         status: formData.status,
         shopToken: formData.shopToken || null,
-        qrcodeUrl: formData.qrcodeUrl || null,
-        sepayApiKey: formData.sepayApiKey || null,
-        bankName: selectedBank?.name || null,
-        bankCode: selectedBank?.bin || null,
-        bankNum: formData.bankNum || null
+        qrcodeUrl: formData.qrcodeUrl || null
       }
 
-      console.log('Updating shop with payload:', payload)
+      // Determine which sections changed
+      const bankNameNew = selectedBank?.name || null
+      const bankCodeNew = selectedBank?.bin || null
+      const bankNumNew = formData.bankNum || null
+      const bankChanged = (
+        bankNameNew !== (shop.bankName ?? null) ||
+        bankCodeNew !== (shop.bankCode ?? null) ||
+        bankNumNew !== (shop.bankNum ?? null)
+      )
 
-      const res = await fetch(`${API_URL}/api/shops/${shop.shopId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
+      const sepayChanged = (formData.sepayApiKey || '') !== (shop.sepayApiKey || '')
 
-      if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text || `Request failed with ${res.status}`)
+      // 1) Update basic fields to Platform API
+      {
+        const res = await fetch(`${API_URL}/api/shops/${shop.shopId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+        if (!res.ok) {
+          const text = await res.text()
+          throw new Error(text || `Request failed with ${res.status}`)
+        }
       }
 
-      onOpenChange(false)
+      // 2) Update bank info to Seller API if changed
+      if (bankChanged) {
+        const bankRes = await fetch(`${SELLER_API_URL}/api/shops/${shop.shopId}/bank-info`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bankName: bankNameNew,
+            bankCode: bankCodeNew,
+            bankNum: bankNumNew,
+          })
+        })
+        if (!bankRes.ok) {
+          const text = await bankRes.text()
+          throw new Error(text || `Bank info update failed with ${bankRes.status}`)
+        }
+      }
+
+      // 3) Update Sepay API key to Seller API if changed
+      if (sepayChanged) {
+        const sepayRes = await fetch(`${SELLER_API_URL}/api/shops/${shop.shopId}/sepay-api-key`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey: formData.sepayApiKey || '' })
+        })
+        if (!sepayRes.ok) {
+          const text = await sepayRes.text()
+          throw new Error(text || `Sepay key update failed with ${sepayRes.status}`)
+        }
+      }
+
       onShopUpdated()
-      alert(st.updateSuccess)
+      // Close edit dialog first, then show success modal to avoid flicker
+      onOpenChange(false)
+      setTimeout(() => setSuccessOpen(true), 100)
     } catch (err) {
       console.error('Update shop failed:', err)
-      alert(st.updateError)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -405,5 +446,26 @@ export function EditShopDialog({ open, onOpenChange, shop, onShopUpdated }: Edit
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Success Modal */}
+    <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle>{st.updateSuccess}</DialogTitle>
+          <DialogDescription>{st.editShop} {shop.shopName}</DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            onClick={() => {
+              setSuccessOpen(false)
+              onOpenChange(false)
+            }}
+          >
+            OK
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

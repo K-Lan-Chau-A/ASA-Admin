@@ -73,19 +73,22 @@ export const shopsTranslations = {
     searchShop: 'Tìm kiếm shop...',
     
     // Table headers
-    shopName: 'Tên shop',
-    owner: 'Chủ sở hữu',
-    address: 'Địa chỉ',
-    package: 'Gói',
-    expiryDate: 'Hết hạn',
-    monthlyRevenue: 'Doanh thu tháng',
-    status: 'Trạng thái',
-    actions: 'Thao tác',
+    tableShopName: 'Tên shop',
+    tableOwner: 'Chủ sở hữu',
+    tableAddress: 'Địa chỉ',
+    tablePackage: 'Gói',
+    tableExpiryDate: 'Hết hạn',
+    tableMonthlyRevenue: 'Doanh thu tháng',
+    tableStatus: 'Trạng thái',
+    tableActions: 'Thao tác',
     
     // Actions
     edit: 'Chỉnh sửa',
     delete: 'Xóa',
     viewDetails: 'Click để xem chi tiết',
+    expiringShopsTitle: 'Các shop sắp hết hạn',
+    expiringShopsSubtitle: 'Shop sắp đến ngày hết hạn sử dụng',
+    expiringBadge: 'Sắp hết hạn',
     
     // Export and filter
     export: 'Xuất dữ liệu',
@@ -94,15 +97,10 @@ export const shopsTranslations = {
     // Package types
     basicPackage: 'Gói Basic',
     premiumPackage: 'Gói Premium',
-    none: 'None',
+    none: 'Không có',
     
-    // Additional fields
-    phoneNumber: 'Số điện thoại',
-    phonePlaceholder: 'VD: 0901234567',
-    emailPlaceholder: 'VD: abc@gmail.com',
+    // Additional helpers
     createTrial: 'Tạo cửa hàng dùng thử',
-    success: 'Thành công',
-    error: 'Lỗi',
     
     // Page elements
     shopInformation: 'Thông tin cửa hàng',
@@ -192,19 +190,22 @@ export const shopsTranslations = {
     searchShop: 'Search shops...',
     
     // Table headers
-    shopName: 'Shop Name',
-    owner: 'Owner',
-    address: 'Address',
-    package: 'Package',
-    expiryDate: 'Expiry Date',
-    monthlyRevenue: 'Monthly Revenue',
-    status: 'Status',
-    actions: 'Actions',
+    tableShopName: 'Shop Name',
+    tableOwner: 'Owner',
+    tableAddress: 'Address',
+    tablePackage: 'Package',
+    tableExpiryDate: 'Expiry Date',
+    tableMonthlyRevenue: 'Monthly Revenue',
+    tableStatus: 'Status',
+    tableActions: 'Actions',
     
     // Actions
     edit: 'Edit',
     delete: 'Delete',
     viewDetails: 'Click to view details',
+    expiringShopsTitle: 'Shops expiring soon',
+    expiringShopsSubtitle: 'Shops approaching their expiry date',
+    expiringShopsBadge: 'Expiring soon',
     
     // Export and filter
     export: 'Export',
@@ -215,13 +216,8 @@ export const shopsTranslations = {
     premiumPackage: 'Premium Package',
     none: 'None',
     
-    // Additional fields
-    phoneNumber: 'Phone Number',
-    phonePlaceholder: 'E.g: 0901234567',
-    emailPlaceholder: 'E.g: abc@gmail.com',
+    // Additional helpers
     createTrial: 'Create Trial Shop',
-    success: 'Success',
-    error: 'Error',
     
     // Page elements
     shopInformation: 'Shop Information',

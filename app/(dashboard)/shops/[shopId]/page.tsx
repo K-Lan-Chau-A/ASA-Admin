@@ -3,9 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Store, Calendar, User, Package, Phone, Mail, MapPin, CreditCard, Settings, Edit } from "lucide-react"
+import { ArrowLeft, Store, Calendar, User, Package, Phone, Mail, MapPin, CreditCard, Settings, Edit, Eye, EyeOff } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
 import API_URL from "@/config/api"
+import SELLER_API_URL from "@/config/sellerApi"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { EditShopDialog } from "@/components/edit-shop-dialog"
@@ -43,6 +44,7 @@ export default function ShopDetailPage() {
   const [shop, setShop] = useState<ShopDetail | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showTechnicalInfo, setShowTechnicalInfo] = useState(false)
 
   const loadShopDetail = async () => {
     try {
@@ -61,7 +63,35 @@ export default function ShopDetailPage() {
         throw new Error('Shop not found')
       }
 
-      setShop(shops[0])
+      const baseShop: ShopDetail = shops[0]
+
+      // Also fetch technical info from Seller API and merge
+      try {
+        const sellerRes = await fetch(`${SELLER_API_URL}/api/shops?ShopId=${shopId}&page=1&pageSize=1`)
+        if (sellerRes.ok) {
+          const sellerJson = await sellerRes.json().catch(() => ({}))
+          const sellerItem = Array.isArray(sellerJson?.items) ? sellerJson.items[0] : null
+          if (sellerItem) {
+            setShop({
+              ...baseShop,
+              // prefer seller fields when available
+              createdAt: sellerItem.createdAt ?? baseShop.createdAt,
+              status: sellerItem.status ?? baseShop.status,
+              shopToken: sellerItem.shopToken ?? baseShop.shopToken,
+              qrcodeUrl: sellerItem.qrcodeUrl ?? baseShop.qrcodeUrl,
+              sepayApiKey: sellerItem.sepayApiKey ?? baseShop.sepayApiKey,
+              bankName: sellerItem.bankName ?? baseShop.bankName,
+              bankCode: sellerItem.bankCode ?? baseShop.bankCode,
+              bankNum: sellerItem.bankNum ?? baseShop.bankNum,
+            })
+            return
+          }
+        }
+      } catch (e) {
+        // ignore seller api errors; keep base data
+      }
+
+      setShop(baseShop)
     } catch (e: any) {
       setError(e?.message ?? 'Failed to load shop details')
       setShop(null)
@@ -247,7 +277,7 @@ export default function ShopDetailPage() {
         </Card>
 
         {/* Bank Information */}
-        {(shop.bankName || shop.bankCode || shop.bankNum) && (
+        {(shop.bankName || shop.bankNum) && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -260,13 +290,6 @@ export default function ShopDetailPage() {
                 <div>
                   <p className="text-sm font-medium">{st.bankName}</p>
                   <p className="text-sm text-muted-foreground">{shop.bankName}</p>
-                </div>
-              )}
-
-              {shop.bankCode && (
-                <div>
-                  <p className="text-sm font-medium">{st.bankCode}</p>
-                  <p className="text-sm text-muted-foreground">{shop.bankCode}</p>
                 </div>
               )}
 
@@ -283,28 +306,35 @@ export default function ShopDetailPage() {
         {/* Technical Information */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
-              {st.technicalInfo}
-            </CardTitle>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                {st.technicalInfo}
+              </CardTitle>
+              <Button variant="outline" size="sm" onClick={() => setShowTechnicalInfo(v => !v)}>
+                {showTechnicalInfo ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+                {showTechnicalInfo ? 'Ẩn' : 'Xem'}
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          {showTechnicalInfo && (
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm font-medium">{st.shopToken}</p>
+                <p className="text-sm text-muted-foreground font-mono">{shop.shopToken || st.noData}</p>
+              </div>
 
-            <div>
-              <p className="text-sm font-medium">{st.shopToken}</p>
-              <p className="text-sm text-muted-foreground font-mono">{shop.shopToken || st.noData}</p>
-            </div>
+              <div>
+                <p className="text-sm font-medium">{st.sepayApiKey}</p>
+                <p className="text-sm text-muted-foreground font-mono">{shop.sepayApiKey || st.noData}</p>
+              </div>
 
-            <div>
-              <p className="text-sm font-medium">{st.sepayApiKey}</p>
-              <p className="text-sm text-muted-foreground font-mono">{shop.sepayApiKey || st.noData}</p>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium">{st.qrCodeUrl}</p>
-              <p className="text-sm text-muted-foreground break-all">{shop.qrcodeUrl || st.noData}</p>
-            </div>
-          </CardContent>
+              <div>
+                <p className="text-sm font-medium">{st.qrCodeUrl}</p>
+                <p className="text-sm text-muted-foreground break-all">{shop.qrcodeUrl || st.noData}</p>
+              </div>
+            </CardContent>
+          )}
          </Card>
        </div>
 

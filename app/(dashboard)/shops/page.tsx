@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Plus, Store, Calendar, User, Package } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import { shopsTranslations } from "@/lib/shops-i18n"
 import API_URL from "@/config/api"
 import { useEffect, useMemo, useState } from "react"
 import { CreateShopDialog } from "@/components/create-shop-dialog"
@@ -19,13 +20,15 @@ type ApiShop = {
   email?: string | null
   address?: string | null
   status: number // 0 inactive, 1 active, 2 trial
+  productName?: string | null
   productType?: string | null
   expiredAt?: string | null
   createdAt?: string
 }
 
 export default function ShopsPage() {
-  const { t } = useLanguage()
+  const { language } = useLanguage()
+  const st = shopsTranslations[language]
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [items, setItems] = useState<ApiShop[]>([])
@@ -67,7 +70,7 @@ export default function ShopsPage() {
         email: s.email || '',
         phone: s.phonenumber,
         address: s.address || '',
-        packageText: s.productType || '',
+        packageText: s.productName || s.productType || '',
         status: statusText as 'active' | 'expired' | 'pending' | 'inactive' | 'trial',
         expiryDate: s.expiredAt ? new Date(s.expiredAt).toISOString().slice(0,10) : '-',
         registeredDate: s.createdAt ? new Date(s.createdAt).toISOString().slice(0,10) : '-',
@@ -79,8 +82,8 @@ export default function ShopsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t('shops.title')}</h1>
-          <p className="text-muted-foreground">{t('shops.subtitle')}</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{st.shopManagement}</h1>
+          <p className="text-muted-foreground">{st.shopManagementSubtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <CreateOrderDialog onOrderCreated={loadShops} />
@@ -91,7 +94,7 @@ export default function ShopsPage() {
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder={t('shops.searchShop')} className="pl-8" />
+          <Input placeholder={st.searchShop} className="pl-8" />
         </div>
       </div>
 
@@ -100,7 +103,7 @@ export default function ShopsPage() {
           <div className="text-sm text-red-600">{error}</div>
         )}
         {loading ? (
-          <div className="text-sm text-muted-foreground">{t('common.loading')}...</div>
+          <div className="text-sm text-muted-foreground">Loading...</div>
         ) : (
         shops.map((shop) => (
           <Card 
@@ -123,12 +126,12 @@ export default function ShopsPage() {
                   }
                 >
                   {shop.status === 'active'
-                    ? t('shops.status.active')
+                    ? st.active
                     : shop.status === 'inactive'
-                    ? t('shops.status.inactive')
+                    ? st.inactive
                     : shop.status === 'trial'
-                    ? (t('shops.status.trial') ?? 'Dùng thử')
-                    : t('shops.status.pending')}
+                    ? st.trial
+                    : st.unknown}
                 </Badge>
               </div>
               <CardDescription className="flex items-center gap-2">
@@ -144,16 +147,16 @@ export default function ShopsPage() {
               
               <div className="flex items-center gap-2 text-sm">
                 <Package className="h-4 w-4 text-muted-foreground" />
-                <span>{t('shops.package')}: {shop.packageText || t('common.none')}</span>
+                <span>{st.productPackage}: {shop.packageText || st.none}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{t('shops.expiryDate')}: {shop.expiryDate}</span>
+                <span>{st.expiryDate || st.expirationDate}: {shop.expiryDate}</span>
               </div>
 
               <div className="pt-2 text-center">
-                <p className="text-xs text-muted-foreground">Click để xem chi tiết</p>
+                <p className="text-xs text-muted-foreground">{st.viewDetails}</p>
               </div>
             </CardContent>
           </Card>
