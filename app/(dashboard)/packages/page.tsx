@@ -280,28 +280,7 @@ export default function PackagesPage() {
         )}
       </div>
 
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>{t('packages.packageStats')}</CardTitle>
-          <CardDescription>{t('packages.packageStatsSubtitle')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">156</div>
-              <div className="text-sm text-muted-foreground">{t('packages.totalShopSubscriptions')}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">₫45,000,000</div>
-              <div className="text-sm text-muted-foreground">{t('packages.monthlyRevenue')}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">89</div>
-              <div className="text-sm text-muted-foreground">{t('packages.activePremiumPackages')}</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+   
 
       {/* Edit Package Dialog */}
       {selectedPackage && (
