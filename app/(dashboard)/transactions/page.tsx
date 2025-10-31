@@ -52,6 +52,7 @@ export default function TransactionsPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [shops, setShops] = useState<Shop[]>([])
   const [products, setProducts] = useState<Product[]>([])
+  const [monthlySummary, setMonthlySummary] = useState<{ totalTransactions: number; successTransactions: number; failedTransactions: number; revenue: number }>({ totalTransactions: 0, successTransactions: 0, failedTransactions: 0, revenue: 0 })
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -68,6 +69,24 @@ export default function TransactionsPage() {
     amount: 0
   })
   const observerRef = useRef<IntersectionObserver | null>(null)
+
+  // Format currency with dots as thousands separator
+  const formatCurrency = (value: number) => {
+    const formatted = Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    return `₫${formatted}`
+  }
+
+  const successRate = (() => {
+    const total = monthlySummary.successTransactions + monthlySummary.failedTransactions
+    if (total === 0) return 0
+    return Math.round((monthlySummary.successTransactions / total) * 1000) / 10
+  })()
+
+  const failureRate = (() => {
+    const total = monthlySummary.successTransactions + monthlySummary.failedTransactions
+    if (total === 0) return 0
+    return Math.round((monthlySummary.failedTransactions / total) * 1000) / 10
+  })()
 
   const loadOrders = async (page: number = 1, append: boolean = false) => {
     try {
@@ -154,6 +173,25 @@ export default function TransactionsPage() {
 
   useEffect(() => {
     loadOrders(1)
+    // Load monthly summary for top KPIs
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/reports/monthly-order-summary`)
+        if (res.ok) {
+          const json = await res.json()
+          if (json?.success && json?.data) {
+            setMonthlySummary({
+              totalTransactions: json.data.totalTransactions ?? 0,
+              successTransactions: json.data.successTransactions ?? 0,
+              failedTransactions: json.data.failedTransactions ?? 0,
+              revenue: json.data.revenue ?? 0,
+            })
+          }
+        }
+      } catch (e) {
+        // silent fail for KPIs
+      }
+    })()
   }, [])
 
   useEffect(() => {
@@ -261,8 +299,7 @@ export default function TransactionsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,250</div>
-            <p className="text-xs text-muted-foreground">+12% {t('transactions.fromLastMonth')}</p>
+            <div className="text-2xl font-bold">{monthlySummary.totalTransactions.toLocaleString('vi-VN')}</div>
           </CardContent>
         </Card>
 
@@ -272,8 +309,7 @@ export default function TransactionsPage() {
             <Store className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₫45,000,000</div>
-            <p className="text-xs text-muted-foreground">+8.5% {t('transactions.fromLastMonth')}</p>
+            <div className="text-2xl font-bold">{formatCurrency(monthlySummary.revenue)}</div>
           </CardContent>
         </Card>
 
@@ -283,8 +319,8 @@ export default function TransactionsPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,180</div>
-            <p className="text-xs text-muted-foreground">{t('transactions.successRate')} 94.4%</p>
+            <div className="text-2xl font-bold">{monthlySummary.successTransactions.toLocaleString('vi-VN')}</div>
+            <p className="text-xs text-muted-foreground">{t('transactions.successRate')} {successRate}%</p>
           </CardContent>
         </Card>
 
@@ -294,8 +330,8 @@ export default function TransactionsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">70</div>
-            <p className="text-xs text-muted-foreground">{t('transactions.failureRate')} 5.6%</p>
+            <div className="text-2xl font-bold">{monthlySummary.failedTransactions.toLocaleString('vi-VN')}</div>
+            <p className="text-xs text-muted-foreground">{t('transactions.failureRate')} {failureRate}%</p>
           </CardContent>
         </Card>
       </div>
