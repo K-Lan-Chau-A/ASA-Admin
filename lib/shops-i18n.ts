@@ -88,7 +88,9 @@ export const shopsTranslations = {
     viewDetails: 'Click để xem chi tiết',
     expiringShopsTitle: 'Các shop sắp hết hạn',
     expiringShopsSubtitle: 'Shop sắp đến ngày hết hạn sử dụng',
+    expiringShopsBadge: 'Sắp hết hạn',
     expiringBadge: 'Sắp hết hạn',
+    expiredBadge: 'Đã hết hạn',
     
     // Export and filter
     export: 'Xuất dữ liệu',
@@ -206,6 +208,7 @@ export const shopsTranslations = {
     expiringShopsTitle: 'Shops expiring soon',
     expiringShopsSubtitle: 'Shops approaching their expiry date',
     expiringShopsBadge: 'Expiring soon',
+    expiredBadge: 'Expired',
     
     // Export and filter
     export: 'Export',

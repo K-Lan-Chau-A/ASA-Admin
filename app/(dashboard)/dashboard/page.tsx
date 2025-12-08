@@ -58,6 +58,23 @@ export default function DashboardPage() {
     return `₫${formatted}`
   }
 
+  // Check if expiredAt date has passed
+  const isExpired = (expiredAt: string) => {
+    if (!expiredAt) return false
+    try {
+      // Parse format "08-12-2025" (DD-MM-YYYY)
+      const [day, month, year] = expiredAt.split('-').map(Number)
+      const expiryDate = new Date(year, month - 1, day)
+      const today = new Date()
+      // Reset time to compare only dates
+      today.setHours(0, 0, 0, 0)
+      expiryDate.setHours(0, 0, 0, 0)
+      return expiryDate < today
+    } catch {
+      return false
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -239,7 +256,16 @@ export default function DashboardPage() {
                   <div className="text-right">
                     <div className="text-sm font-semibold text-foreground">{formatCurrency(item.currentPackagePrice)}</div>
                     <div className="text-xs text-muted-foreground">{item.expiredAt}</div>
-                    <div className="inline-block mt-1 px-2 py-0.5 text-xs rounded-full bg-red-500 text-white">{st.expiringShopsBadge || st.expiringBadge}</div>
+                    <div className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full text-white ${
+                      isExpired(item.expiredAt) 
+                        ? 'bg-gray-600' 
+                        : 'bg-red-500'
+                    }`}>
+                      {isExpired(item.expiredAt) 
+                        ? (st as any).expiredBadge || 'Đã hết hạn'
+                        : ((st as any).expiringShopsBadge || (st as any).expiringBadge || 'Sắp hết hạn')
+                      }
+                    </div>
                   </div>
                 </div>
               ))}
